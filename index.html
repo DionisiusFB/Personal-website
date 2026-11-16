@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dio, AI and Light</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='8' width='28' height='18' rx='9' fill='%23effaf3' stroke='%233cb56a' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='17' r='2.2' fill='%2317243f'/%3E%3Ccircle cx='20' cy='17' r='2.2' fill='%2317243f'/%3E%3C/svg%3E">
+<meta name="description" content="Dionisius Felysto Bagastama (Dio): Informatics student at Telkom University building neural networks for photonic sensing. Looking for AI internships and roles.">
+<style>
+/* Fonts are self-hosted (SIL Open Font License): Unbounded and Atkinson Hyperlegible */
+@font-face { font-family: "Unbounded"; font-weight: 400; font-display: swap; src: url("fonts/unbounded-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Unbounded"; font-weight: 600; font-display: swap; src: url("fonts/unbounded-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Unbounded"; font-weight: 800; font-display: swap; src: url("fonts/unbounded-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-weight: 700; font-display: swap; src: url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+/* Layout idea: an oscilloscope screen in the hero splits one fast signal into three
+   channels (Ch1 quick, Ch2 full, Ch3 diagonal). Each channel color then marks its path
+   through the page. The page itself sits on an optical breadboard. */
+:root {
+  --steel: #e4e8eb;        /* breadboard, page background (day) */
+  --steel-hole: #c9d0d6;   /* breadboard holes */
+  --ink: #17243f;          /* main text, deep navy */
+  --ink-soft: #4a5872;     /* secondary text */
+  --paper: #f5f7f8;        /* raised surfaces */
+  --screen: #0d1b26;       /* scope screen, both modes */
+  --grat: rgba(140, 200, 220, .16); /* scope graticule */
+  --ch1: #e9c42a;          /* Tektronix channel 1, yellow */
+  --ch2: #27a6d6;          /* channel 2, cyan */
+  --ch3: #d8489d;          /* channel 3, magenta */
+  --ch4: #3cb56a;          /* channel 4, green: Piko */
+  --ch1-ink: #7a6200;      /* channel colors dark enough for text on light */
+  --ch2-ink: #0b6d93;
+  --ch3-ink: #a51f6c;
+  --ch4-ink: #1f7a43;
+  --line: #c3cbd2;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.2rem;
+  --step-4: clamp(2.2rem, 5.2vw, 3.9rem);
+  --radius-stadium: 999px;
+  color-scheme: light;
+}
+:root[data-mode="night"] {
+  --steel: #111d2b;
+  --steel-hole: #1b2a3b;
+  --ink: #e3e9ef;
+  --ink-soft: #a5b3c3;
+  --paper: #172636;
+  --screen: #08131c;
+  --ch1-ink: #f0d258;
+  --ch2-ink: #66c6ec;
+  --ch3-ink: #f07dbf;
+  --ch4-ink: #6fd897;
+  --line: #2a3b4e;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+.still { scroll-behavior: auto; }
+body {
+  margin: 0;
+  background-color: var(--steel);
+  background-image: radial-gradient(circle at 12px 12px, var(--steel-hole) 3.2px, transparent 3.6px);
+  background-size: 25px 25px; /* M6 holes on a 25 mm grid, scaled */
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  transition: background-color .4s, color .4s;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--ch2); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--step-3); font-weight: 600; letter-spacing: -.01em; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+p { margin: 0; }
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* ---------- header ---------- */
+.top {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--steel) 88%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 12px; padding-block: 10px; flex-wrap: wrap; }
+.mark { font-family: var(--display); font-weight: 800; font-size: 1.15rem; text-decoration: none; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+.mark i { width: 22px; height: 12px; border-radius: var(--radius-stadium); background: var(--ch4); box-shadow: 0 0 10px var(--ch4); display: inline-block; }
+.tog {
+  font: 600 .9rem var(--body); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line);
+  padding: 7px 14px; border-radius: var(--radius-stadium); cursor: pointer;
+}
+.tog:hover { border-color: var(--ink-soft); }
+.tog[aria-pressed="true"] { background: var(--ink); color: var(--steel); border-color: var(--ink); }
+
+/* ---------- hero ---------- */
+.hero { padding-block: clamp(32px, 6vw, 72px) 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.hero .hi { font-family: var(--display); font-size: var(--step-1); font-weight: 400; color: var(--ink-soft); margin-bottom: 10px; }
+.hero h1 { font-size: var(--step-4); font-weight: 800; letter-spacing: -.025em; }
+.hero h1 .beam {
+  background: linear-gradient(90deg, var(--ch1), var(--ch2) 25%, var(--ch3) 50%, var(--ch4) 75%, var(--ch1));
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: flowcolor 5s linear infinite;
+}
+/* colors travel left to right, like a signal along a fiber */
+@keyframes flowcolor { from { background-position: 0% 0; } to { background-position: -200% 0; } }
+.hero .lede { margin-top: 20px; max-width: 46ch; color: var(--ink-soft); font-size: 1.12rem; }
+.hero .name { margin-top: 18px; font-size: .95rem; color: var(--ink-soft); }
+
+.scope {
+  position: relative; background: var(--screen); border-radius: 22px; padding: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 18px 40px -22px rgba(10, 25, 40, .55);
+  color: #dfe9ef;
+}
+.scope-head { display: flex; justify-content: space-between; font-size: .82rem; color: #8fa6b6; padding: 0 4px 10px; gap: 8px; flex-wrap: wrap; }
+.scope-stage { position: relative; aspect-ratio: 10 / 7.4; border-radius: 12px; overflow: hidden;
+  background-image:
+    linear-gradient(var(--grat) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grat) 1px, transparent 1px);
+  background-size: 10% 12.5%; /* 10 x 8 divisions, like a real scope graticule */
+  background-position: -1px -1px;
+}
+#scopeCanvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+.paths { position: absolute; inset: 0; pointer-events: none; }
+.path-btn {
+  pointer-events: auto; position: absolute; right: 3%;
+  display: grid; gap: 1px; text-align: left; text-decoration: none;
+  padding: 9px 18px 10px; border-radius: var(--radius-stadium);
+  background: rgba(8, 19, 28, .85); color: #f2f6f8;
+  border: 2px solid var(--c); box-shadow: 0 0 18px -4px var(--c);
+  min-width: 46%;
+  transition: transform .2s, box-shadow .2s;
+}
+.path-btn:hover { transform: translateX(-4px); box-shadow: 0 0 26px -2px var(--c); }
+.path-btn b { font-family: var(--display); font-weight: 600; font-size: clamp(.82rem, 1.5vw, 1rem); }
+.path-btn span { font-size: .82rem; color: #a9bccb; }
+.path-btn em { font-style: normal; color: var(--c); font-size: .75rem; font-weight: 700; }
+.p1 { --c: var(--ch1); top: 7%; }
+.p2 { --c: var(--ch2); top: 38%; }
+.p3 { --c: var(--ch3); top: 67%; right: 1.5%; transform: rotate(-4deg); }
+.p3:hover { transform: rotate(-4deg) translateX(-4px); }
+.scope-foot { padding: 10px 4px 0; font-size: .86rem; color: #8fa6b6; }
+
+/* ---------- sections ---------- */
+section.band { padding-block: 56px; scroll-margin-top: 64px; }
+.chtag { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .9rem; color: var(--tag-ink); margin-bottom: 10px; }
+.chtag::before { content: ""; width: 26px; height: 10px; border-radius: var(--radius-stadium); background: var(--tag); }
+.t1 { --tag: var(--ch1); --tag-ink: var(--ch1-ink); }
+.t2 { --tag: var(--ch2); --tag-ink: var(--ch2-ink); }
+.t3 { --tag: var(--ch3); --tag-ink: var(--ch3-ink); }
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: clamp(20px, 4vw, 40px); }
+
+/* quick */
+.quick { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: clamp(20px, 4vw, 44px); align-items: start; }
+.quick figure { margin: 0; }
+.quick figure img { border-radius: 18px; aspect-ratio: 1; object-fit: cover; }
+.quick figcaption { font-size: .85rem; color: var(--ink-soft); margin-top: 8px; }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 12px 24px; margin: 22px 0 0; }
+.facts dt { font-weight: 700; color: var(--ink-soft); }
+.facts dd { margin: 0; max-width: 62ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; align-items: center; }
+.btn {
+  font: 700 .95rem var(--body); text-decoration: none; cursor: pointer;
+  padding: 10px 18px; border-radius: var(--radius-stadium);
+  border: 2px solid var(--ink); background: transparent; color: var(--ink);
+}
+.btn.solid { background: var(--ink); color: var(--steel); }
+.btn:hover { background: var(--ink); color: var(--steel); }
+.note { font-size: .92rem; color: var(--ink-soft); }
+.note[hidden] { display: none; }
+.email { font-weight: 700; user-select: all; }
+
+/* research */
+.research { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 48px); margin-top: 24px; }
+.research .body > p + p { margin-top: 14px; }
+.research .body { max-width: 64ch; }
+.paper { margin-top: 22px; padding-left: 16px; border-left: 4px solid var(--ch2); }
+.paper strong { display: block; }
+.paper span { display: block; font-size: .92rem; color: var(--ink-soft); }
+.bars { margin-top: 26px; display: grid; gap: 10px; padding: 18px 20px; border-radius: 18px; background: color-mix(in srgb, var(--paper) 70%, transparent); border: 1px solid var(--line); }
+.bars-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.bars h3 { font-size: 1rem; }
+.seg { display: inline-flex; padding: 3px; border-radius: var(--radius-stadium); border: 1px solid var(--line); background: var(--steel); }
+.segb { font: 700 .82rem var(--body); color: var(--ink-soft); background: transparent; border: 0; padding: 6px 12px; border-radius: var(--radius-stadium); cursor: pointer; }
+.segb[aria-pressed="true"] { background: var(--ink); color: var(--steel); }
+.bar { display: grid; grid-template-columns: 8.6em minmax(0, 1fr) 3.4em 3.6em; gap: 10px; align-items: center; font-size: .95rem; }
+.bar .track { display: block; height: 14px; border-radius: var(--radius-stadium); background: color-mix(in srgb, var(--line) 60%, transparent); overflow: hidden; }
+.bar .fill { position: relative; display: block; height: 100%; width: 0; border-radius: var(--radius-stadium); background: var(--ink-soft); overflow: hidden;
+  transition: width 1.1s cubic-bezier(.22, .8, .25, 1); transition-delay: calc(var(--i, 0) * 140ms); }
+.bar.best .fill { background: linear-gradient(90deg, var(--ch2), var(--ch4)); box-shadow: 0 0 12px -2px var(--ch2); }
+/* a light sweep running left to right through each bar, like a signal passing */
+.bars.run .fill::after { content: ""; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: translateX(-120%); animation: sweep 2.6s ease-in-out infinite; animation-delay: calc(1.2s + var(--i, 0) * 180ms); }
+@keyframes sweep { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(300%); } }
+.bar .v { font-variant-numeric: tabular-nums; text-align: right; font-weight: 700; }
+.bar .w { font-size: .82rem; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
+.bar.best .nm { font-weight: 700; color: var(--ch2-ink); }
+.bars .src { font-size: .85rem; color: var(--ink-soft); }
+.photos { display: grid; gap: 14px; align-content: start; }
+.photos figure { margin: 0; }
+.photos img { border-radius: 16px; aspect-ratio: 4 / 3; object-fit: cover; }
+.photos figcaption { font-size: .85rem; color: var(--ink-soft); margin-top: 6px; }
+
+/* projects */
+.proj-list { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 0; }
+.proj { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 8px 32px; padding: 22px 0; border-top: 1px solid var(--line); }
+.proj h3 { font-size: 1.1rem; }
+.proj .meta { font-size: .88rem; color: var(--ink-soft); margin-top: 6px; }
+.proj p { max-width: 64ch; }
+.proj a { font-weight: 700; color: var(--ch2-ink); }
+.more { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 28px; }
+.more div { font-size: .95rem; }
+.more b { display: block; }
+
+/* experience */
+.xp { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 14px; }
+.xp li { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 4px 24px; }
+.xp .when { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.xp b { display: block; }
+
+/* diagonal */
+.diag-sheet { position: relative; overflow: hidden; }
+.diag-sheet::before {
+  content: ""; position: absolute; width: 160%; height: 6px; background: var(--ch3);
+  top: 0; left: -30%; transform: rotate(-8deg); transform-origin: left top; opacity: .55;
+  box-shadow: 0 0 22px var(--ch3);
+}
+.diag-intro { max-width: 60ch; margin-top: 12px; }
+.diag-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; margin-top: 28px; }
+.funfacts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; align-content: start; }
+.funfacts li { padding: 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--ch3) 9%, transparent); }
+.funfacts button { all: unset; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.funfacts button:focus-visible { outline: 3px solid var(--ch2); }
+.diag-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-content: start; }
+.diag-photos figure { margin: 0; }
+.diag-photos img { border-radius: 16px; aspect-ratio: 3 / 4; object-fit: cover; }
+.diag-photos figure:first-child { transform: rotate(-2deg); }
+.diag-photos figure:last-child { transform: rotate(2deg) translateY(18px); }
+.diag-photos figcaption { font-size: .85rem; color: var(--ink-soft); margin-top: 6px; }
+.secrets { margin-top: 30px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 22px; height: 10px; border-radius: var(--radius-stadium); border: 2px solid var(--ch3); display: inline-block; }
+.dots i.on { background: var(--ch3); box-shadow: 0 0 10px var(--ch3); }
+
+/* contact */
+.contact { padding-block: 56px 120px; }
+.contact p { margin-top: 10px; max-width: 56ch; color: var(--ink-soft); }
+
+/* sections power on as they come into view, and dim as they leave */
+.js-reveal .band, .js-reveal .contact { opacity: .12; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
+.js-reveal .band.lit, .js-reveal .contact.lit { opacity: 1; transform: none; }
+.js-reveal .chtag::before { transform-origin: left center; transform: scaleX(.25); transition: transform .9s .2s cubic-bezier(.22, .8, .25, 1), box-shadow .9s .2s; }
+.js-reveal .lit .chtag::before { transform: scaleX(1); box-shadow: 0 0 14px var(--tag); }
+
+/* recruiter mode */
+.recruiter-banner { display: none; background: var(--ch1); color: #1d1a05; font-weight: 700; padding: 10px 0; }
+body.recruiter .recruiter-banner { display: block; }
+body.recruiter #diagonal, body.recruiter .piko-root, body.recruiter .p3 { display: none !important; }
+body.recruiter .path-btn { transition: none; }
+body.recruiter .band, body.recruiter .contact { opacity: 1 !important; transform: none !important; }
+
+
+/* ---------- journey ---------- */
+.jsub { margin-top: 10px; color: var(--ink-soft); max-width: 60ch; }
+.journey-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; margin-top: 30px; align-items: start; }
+.journey { position: relative; list-style: none; margin: 0; padding: 0 0 0 46px; display: grid; gap: 26px; }
+.journey::before, .journey::after { content: ""; position: absolute; left: 15px; top: 8px; width: 4px; border-radius: var(--radius-stadium); }
+.journey::before { bottom: 8px; background: var(--line); }
+.journey::after { height: calc((100% - 16px) * var(--prog, 0)); background: linear-gradient(var(--ch1), var(--ch2) 35%, var(--ch3) 65%, var(--ch4)); box-shadow: 0 0 12px var(--ch2); }
+.stop { position: relative; }
+.stop::before { content: ""; position: absolute; left: -39px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--steel); border: 3px solid var(--line); transition: background .4s, border-color .4s, box-shadow .4s, transform .4s; }
+.stop[data-place="bdg"] { --node: var(--ch1); }
+.stop[data-place="knz"] { --node: var(--ch3); }
+.stop.on::before { background: var(--node); border-color: var(--node); box-shadow: 0 0 14px var(--node); transform: scale(1.15); }
+.stop-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+.stop .when { font-weight: 700; font-variant-numeric: tabular-nums; }
+.place { font-size: .8rem; font-weight: 700; padding: 2px 10px; border-radius: var(--radius-stadium); border: 1.5px solid var(--node); color: var(--ink); }
+.stop p { max-width: 58ch; color: var(--ink-soft); transition: color .4s; }
+.stop.on p { color: var(--ink); }
+.route { position: sticky; top: 90px; background: var(--screen); border-radius: 20px; padding: 14px; color: #cfe0ea; }
+.route svg { width: 100%; height: auto; display: block; }
+.route figcaption { font-size: .82rem; color: #8fa6b6; margin-top: 8px; }
+
+/* ---------- flip cards ---------- */
+.cards { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.card { perspective: 1400px; }
+.card-inner { display: grid; transition: transform .7s cubic-bezier(.3, .7, .25, 1); transform-style: preserve-3d; height: 100%; }
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); }
+.front { background: var(--paper); cursor: pointer; }
+.front:hover { border-color: var(--ink-soft); }
+.back { background: var(--screen); color: #e3ecf2; transform: rotateY(180deg); border-color: transparent; }
+.still .face.back { transform: none; }
+.still .card .back { visibility: hidden; }
+.still .card.flipped .back { visibility: visible; }
+.still .card.flipped .front { visibility: hidden; }
+.still .card.flipped .card-inner { transform: none; }
+.face h3 { font-size: 1.1rem; }
+.face .meta { font-size: .86rem; color: var(--ink-soft); }
+.face .hook { flex: 1; font-size: 1.08rem; }
+.stack-front { font-size: .82rem; color: var(--ink-soft); }
+.back b { display: block; font-size: .78rem; color: #8fe0ad; margin-top: 4px; }
+.back p { font-size: .95rem; }
+.back .stack { font-size: .82rem; color: #9fb6c5; }
+.back a { color: #9fe0ff; font-weight: 700; }
+.flipbtn { align-self: flex-start; font: 700 .86rem var(--body); cursor: pointer; padding: 7px 14px; border-radius: var(--radius-stadium); background: transparent; border: 2px solid currentColor; color: inherit; }
+.front .flipbtn { color: var(--ch2-ink); }
+.back .flipbtn { color: #e3ecf2; margin-top: auto; }
+
+/* ---------- thesis demo ---------- */
+.demo-intro { margin-top: 10px; max-width: 64ch; color: var(--ink-soft); }
+.demo { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; margin-top: 24px; align-items: stretch; }
+.demo-screen { position: relative; background: var(--screen); border-radius: 20px; padding: 14px; color: #dfe9ef; display: flex; flex-direction: column; gap: 10px; }
+.demo-stage { position: relative; aspect-ratio: 16 / 8; border-radius: 12px; overflow: hidden;
+  background-image: linear-gradient(var(--grat) 1px, transparent 1px), linear-gradient(90deg, var(--grat) 1px, transparent 1px);
+  background-size: 10% 12.5%; background-position: -1px -1px; }
+#demoCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .82rem; color: #a9bccb; }
+.legend i { display: inline-block; width: 18px; height: 4px; border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+.demo-panel { display: grid; gap: 16px; align-content: start; padding: 18px; border-radius: 20px; background: var(--paper); border: 1px solid var(--line); }
+.demo-panel fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.demo-panel legend { font-weight: 700; font-size: .9rem; margin-bottom: 6px; padding: 0; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font: 700 .85rem var(--body); cursor: pointer; padding: 6px 12px; border-radius: var(--radius-stadium); border: 2px solid var(--line); background: transparent; color: var(--ink); }
+.pill[aria-pressed="true"] { border-color: var(--pc, var(--ink)); background: color-mix(in srgb, var(--pc, var(--ink)) 16%, transparent); }
+.score { display: grid; gap: 2px; }
+.score span { font-size: .84rem; color: var(--ink-soft); }
+.score b { font-family: var(--display); font-size: 2rem; font-variant-numeric: tabular-nums; }
+.bands { display: grid; gap: 6px; }
+.band-row { display: grid; grid-template-columns: 6.6em minmax(0, 1fr) 3.4em; gap: 8px; align-items: center; font-size: .84rem; }
+.band-row .track { height: 8px; border-radius: 8px; background: color-mix(in srgb, var(--line) 60%, transparent); overflow: hidden; display: block; }
+.band-row .fill { display: block; height: 100%; width: 0; border-radius: 8px; background: var(--pc, var(--ch2)); transition: width .6s ease; }
+.band-row .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+.demo-note { margin-top: 12px; font-size: .85rem; color: var(--ink-soft); max-width: 72ch; }
+
+@media (max-width: 880px) {
+  .journey-wrap { grid-template-columns: 1fr; }
+  .route { position: relative; top: 0; max-width: 420px; order: -1; }
+  .demo { grid-template-columns: 1fr; }
+  .demo-stage { aspect-ratio: 16 / 10; }
+}
+
+/* ---------- Piko ---------- */
+.piko-root { position: fixed; left: 0; top: 0; z-index: 50; width: 78px; height: 74px; will-change: transform; }
+.piko-root.offstage { visibility: hidden; }
+.dialog {
+  position: absolute; left: 0; top: 0;
+  width: min(330px, calc(100vw - 36px));
+  background: #0c1822; color: #eaf2f6;
+  border: 2px solid var(--ch4); border-radius: 18px;
+  box-shadow: 0 0 24px -6px var(--ch4), 0 20px 40px -20px rgba(0,0,0,.6);
+  padding: 14px 16px 12px;
+  transform-origin: bottom right;
+  transition: transform .22s ease, opacity .22s ease;
+}
+/* see-through when the visitor's mouse comes close, so nothing stays hidden under it */
+.dialog.ghost { opacity: .12; pointer-events: none; }
+/* folded bubble: a small chip next to Piko */
+.peek { position: absolute; left: -30px; top: -6px; font: 800 1rem var(--display); line-height: 1; cursor: pointer;
+  padding: 4px 10px 8px; border-radius: var(--radius-stadium); background: #0c1822; color: #9df0bd;
+  border: 2px solid var(--ch4); box-shadow: 0 0 14px -4px var(--ch4); }
+.peek[hidden] { display: none; }
+.peek:focus-visible { outline: 3px solid var(--ch2); }
+.dialog[hidden] { display: block; transform: scale(.85); opacity: 0; visibility: hidden; }
+.trail { position: fixed; left: 0; top: 0; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #9df0bd; box-shadow: 0 0 10px 2px var(--ch4); pointer-events: none; z-index: 49; animation: trail .7s ease-out forwards; }
+@keyframes trail { to { opacity: 0; transform: scale(.2); } }
+.dialog .who { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; color: #93e6b2; font-weight: 700; margin-bottom: 6px; }
+.dialog .who button { all: unset; cursor: pointer; color: #9db3c2; font-weight: 700; padding: 2px 6px; border-radius: 6px; }
+.dialog .who button:hover { color: #fff; }
+.dialog .who button:focus-visible { outline: 2px solid var(--ch4); }
+.dialog .say { min-height: 3.1em; font-size: 1rem; line-height: 1.5; cursor: pointer; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.choices button {
+  font: 700 .86rem var(--body); cursor: pointer;
+  background: transparent; color: #eaf2f6; border: 1.5px solid #4d6576;
+  padding: 6px 12px; border-radius: var(--radius-stadium);
+}
+.choices button:hover { border-color: var(--ch4); color: #fff; }
+.piko-btn { all: unset; cursor: pointer; width: 78px; height: 74px; display: grid; place-items: center; border-radius: 24px; position: relative; transition: transform .25s; }
+.piko-btn.hop .piko-svg { animation: hop .6s ease; }
+@keyframes hop { 30% { transform: translateY(-16px) scale(1.06); } 60% { transform: translateY(0) scale(.96, 1.04); } }
+.piko-btn:focus-visible { outline: 3px solid var(--ch4); }
+.piko-svg { width: 74px; height: 70px; overflow: visible; animation: bob 3.2s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(60, 181, 106, .75)); }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+.piko-svg .eye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+.piko-svg .wave { stroke-dasharray: 6 4; animation: flow 1.2s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -20; } }
+.piko-svg .sleep-eye, .piko-svg .zz { display: none; }
+.asleep .piko-svg { animation-duration: 6s; filter: drop-shadow(0 0 4px rgba(60, 181, 106, .45)); }
+.asleep .piko-svg .eye { display: none; }
+.asleep .piko-svg .sleep-eye, .asleep .piko-svg .zz { display: inline; }
+.zz { font: 700 13px var(--display); fill: var(--ch4); animation: zz 2.4s ease-in-out infinite; }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -14px); } }
+.piko-btn.giggle .piko-svg { animation: giggle .35s ease 2; }
+@keyframes giggle { 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+
+/* calm mode: on when the device asks for less motion, unless the visitor turns animations on */
+.still *, .still *::before, .still *::after { animation: none !important; transition: none !important; }
+
+
+/* ---------- responsive ---------- */
+@media (max-width: 880px) {
+  .hero { grid-template-columns: 1fr; }
+  .research, .diag-grid { grid-template-columns: 1fr; }
+  .proj { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .quick { grid-template-columns: 1fr; }
+  .quick figure { max-width: 180px; }
+  .facts { grid-template-columns: 1fr; gap: 2px; }
+  .facts dd { margin-bottom: 12px; }
+  .xp li { grid-template-columns: 1fr; }
+  .scope-stage { aspect-ratio: 10 / 11; }
+  .path-btn { min-width: 64%; padding: 8px 14px; }
+  .p1 { top: 5%; } .p2 { top: 36%; } .p3 { top: 68%; }
+  .top { position: static; }
+  .dialog { font-size: .95rem; }
+  .dialog .say { min-height: 0; }
+  .piko-root { width: 62px; height: 58px; }
+  .piko-btn { width: 62px; height: 58px; }
+  .piko-svg { width: 60px; height: 56px; }
+  .tog { padding: 6px 11px; font-size: .84rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="recruiter-banner" role="status"><div class="wrap" data-i18n="recBanner">Recruiter mode is on: no effects, no detours. Everything important is right below.</div></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Dio, back to top"><i aria-hidden="true"></i>Dio</a>
+    <button class="tog" id="langBtn" type="button" data-i18n="langBtn">Bahasa Indonesia</button>
+    <button class="tog" id="modeBtn" type="button" aria-pressed="false" data-i18n="modeNight">Night mode</button>
+    <button class="tog" id="motionBtn" type="button" aria-pressed="true" data-i18n="animOn">Animations on</button>
+    <button class="tog" id="recBtn" type="button" aria-pressed="false" data-i18n="recOn">Recruiter mode</button>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <p class="hi" data-i18n="hi">Hi, I'm Dio.</p>
+      <h1><span data-i18n="h1a">I build AI that</span> <span class="beam" data-i18n="h1b">reads light.</span></h1>
+      <p class="lede" data-i18n="lede">Final-year Informatics student at Telkom University. I spent a semester at Kanazawa University in Japan, teaching neural networks to rebuild light signals that are too fast for ordinary detectors. Now looking for AI internships and roles.</p>
+      <p class="name">Dionisius Felysto Bagastama</p>
+    </div>
+
+    <div class="scope" aria-label="Choose how you want to get to know Dio">
+      <div class="scope-head"><span data-i18n="scopeL">Input: one fast signal</span><span data-i18n="scopeR">Pick a channel</span></div>
+      <div class="scope-stage">
+        <canvas id="scopeCanvas" aria-hidden="true"></canvas>
+        <nav class="paths" aria-label="Paths">
+          <a class="path-btn p1" href="#quick" data-path="quick"><em>Ch 1</em><b data-i18n="p1">The 30-second version</b><span data-i18n="p1s">For busy recruiters</span></a>
+          <a class="path-btn p2" href="#research" data-path="full"><em>Ch 2</em><b data-i18n="p2">The full story</b><span data-i18n="p2s">Research, projects, experience</span></a>
+          <a class="path-btn p3" href="#diagonal" data-path="diag"><em>Ch 3</em><b data-i18n="p3">The diagonal</b><span data-i18n="p3s">The side that doesn't fit on a CV</span></a>
+        </nav>
+      </div>
+      <p class="scope-foot" data-i18n="scopeFoot">Like in my research: a tiny cavity spreads one fast signal over several slower channels. Here, each channel is a way to read me.</p>
+    </div>
+  </div>
+
+  <!-- Ch1: quick -->
+  <section class="band" id="quick">
+    <div class="wrap">
+      <div class="sheet">
+        <div class="quick">
+          <figure>
+            <img src="img/portrait.jpg" alt="Portrait of Dio in a white shirt" width="640" height="640">
+            <figcaption>Dionisius Felysto Bagastama</figcaption>
+          </figure>
+          <div>
+            <p class="chtag t1">Ch 1</p>
+            <h2 data-i18n="qH">The 30-second version</h2>
+            <dl class="facts">
+              <dt data-i18n="qWho">Who</dt>
+              <dd data-i18n="qWhoV">Dio. S1 Informatics, International Class (2023 intake), Telkom University, Bandung, Indonesia.</dd>
+              <dt data-i18n="qWant">Looking for</dt>
+              <dd data-i18n="qWantV">AI and machine learning internships now, and a full-time AI role after I graduate.</dd>
+              <dt data-i18n="qRes">Research</dt>
+              <dd data-i18n="qResV">A hybrid neural network readout for photonic reservoir sensing. First-author paper accepted at ICICyTA 2026.</dd>
+              <dt data-i18n="qExp">Experience</dt>
+              <dd data-i18n="qExpV">Research Assistant, Kanazawa University (2026). Database Programmer intern, CV. Galatika Media Multi (2026). Editor for IEEE ICoDSA and ICoICT 2025.</dd>
+              <dt data-i18n="qTools">Tools</dt>
+              <dd>Python, PyTorch, scikit-learn, NumPy, SciPy, Jupyter, SQL and ODBC, Kotlin, Java, Go, LaTeX, Git and GitHub Actions</dd>
+              <dt data-i18n="qLang">Languages</dt>
+              <dd data-i18n="qLangV">English (TOEIC 845), Bahasa Indonesia, Sundanese, Javanese. Learning Japanese.</dd>
+            </dl>
+            <div class="actions">
+              <button class="btn solid" type="button" id="emailBtn" data-i18n="aEmail">Show my email</button>
+              <a class="btn" href="https://www.linkedin.com/in/dionisius-felysto-bagastama-45383933a/" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="btn" href="https://github.com/DionisiusFB" target="_blank" rel="noopener">GitHub</a>
+              <a class="btn" id="cvBtn" href="cv/Dionisius_Felysto_Bagastama_CV.pdf" target="_blank" rel="noopener" data-i18n="aCv">Get my CV (PDF)</a>
+            </div>
+            <p class="note" id="emailNote" hidden><span class="email">dionisiusfelysto1@gmail.com</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Ch2: journey -->
+  <section class="band" id="journey">
+    <div class="wrap">
+      <p class="chtag t2">Ch 2</p>
+      <h2 data-i18n="jH">How I got here</h2>
+      <p class="jsub" data-i18n="jSub">Bandung to Kanazawa and back. Scroll and follow the light.</p>
+      <div class="journey-wrap">
+        <ol class="journey" id="journeyList">
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when">2023</span><span class="place">Bandung</span></div><p data-i18n="j1">Started S1 Informatics in the International Class at Telkom University.</p></li>
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when">2025</span><span class="place">Bandung</span></div><p data-i18n="j2">Became an editor for two IEEE conferences, ICoDSA and ICoICT, and joined the Humanity journal team.</p></li>
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when">2025</span><span class="place">Bandung</span></div><p data-i18n="j3">5th place at HACKATTACK with BaSik, a reading app for kids.</p></li>
+          <li class="stop" data-place="knz"><div class="stop-head"><span class="when" data-i18n="jw4">Spring 2026</span><span class="place">Kanazawa</span></div><p data-i18n="j4">Flew about 5,700 km to Japan for the KUEP exchange and joined the Sunada and Niiyama Lab.</p></li>
+          <li class="stop" data-place="knz"><div class="stop-head"><span class="when">2026</span><span class="place">Hakusan</span></div><p data-i18n="j5">A UNESCO field trip to Shiramine and Mount Hakusan. Between lab days, I made hotel beds part-time and kept learning Japanese.</p></li>
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when" data-i18n="jw6">Aug 2026</span><span class="place">Bandung</span></div><p data-i18n="j6">Flew home with a research result to write up.</p></li>
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when" data-i18n="jw7">Sep to Nov 2026</span><span class="place">Bandung</span></div><p data-i18n="j7">Internship at CV. Galatika Media Multi, and DATASCAPE 2026 with my group.</p></li>
+          <li class="stop" data-place="bdg"><div class="stop-head"><span class="when">Nov 2026</span><span class="place">Bandung</span></div><p data-i18n="j8">Paper accepted at ICICyTA 2026. The conference is in December.</p></li>
+        </ol>
+        <figure class="route" aria-label="Route between Bandung and Kanazawa">
+          <svg viewBox="0 0 300 260" aria-hidden="true">
+            <g stroke="rgba(140,200,220,.18)" stroke-width="1">
+              <line x1="30" y1="0" x2="30" y2="260"/><line x1="90" y1="0" x2="90" y2="260"/><line x1="150" y1="0" x2="150" y2="260"/><line x1="210" y1="0" x2="210" y2="260"/><line x1="270" y1="0" x2="270" y2="260"/>
+              <line x1="0" y1="21.7" x2="300" y2="21.7"/><line x1="0" y1="65" x2="300" y2="65"/><line x1="0" y1="108.3" x2="300" y2="108.3"/><line x1="0" y1="151.7" x2="300" y2="151.7"/><line x1="0" y1="238.3" x2="300" y2="238.3"/>
+            </g>
+            <line x1="0" y1="195" x2="300" y2="195" stroke="rgba(233,196,42,.35)" stroke-dasharray="3 4"/>
+            <g fill="#7f98a8" font-size="9" font-family="Atkinson Hyperlegible, sans-serif">
+              <text x="4" y="19">40°N</text><text x="4" y="192">0°</text><text x="92" y="256">110°E</text><text x="212" y="256">130°E</text>
+            </g>
+            <path id="routeOut" d="M75.7 225 Q 100 60 250 36.6" fill="none" stroke="rgba(39,166,214,.55)" stroke-width="2" stroke-dasharray="5 5"/>
+            <path id="routeBack" d="M250 36.6 Q 235 205 75.7 225" fill="none" stroke="rgba(216,72,157,.55)" stroke-width="2" stroke-dasharray="5 5"/>
+            <circle cx="75.7" cy="225" r="5" fill="#e9c42a"/><circle cx="250" cy="36.6" r="5" fill="#d8489d"/>
+            <g fill="#e3ecf2" font-size="12" font-weight="700" font-family="Atkinson Hyperlegible, sans-serif">
+              <text x="86" y="230">Bandung</text><text x="186" y="58">Kanazawa</text>
+            </g>
+            <circle id="routeDot" cx="75.7" cy="225" r="6" fill="#fff" style="filter: drop-shadow(0 0 6px #9df0bd)"/>
+          </svg>
+          <figcaption data-i18n="jCap">Bandung 6.9° S, 107.6° E. Kanazawa 36.6° N, 136.7° E. About 5,700 km apart.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ch2: research -->
+  <section class="band" id="research">
+    <div class="wrap">
+      <p class="chtag t2">Ch 2</p>
+      <h2 data-i18n="rH">Research: helping slow detectors see fast light</h2>
+      <div class="research">
+        <div class="body">
+          <p data-i18n="r1">A photodetector can be fast or sensitive, but rarely both. A photonic reservoir, here a tiny silicon microcavity, spreads one fast optical signal over nine slower detector channels. A readout model then rebuilds the original signal from those channels.</p>
+          <p data-i18n="r2">The usual readout is plain linear regression, picked because it is cheap to train. At the Sunada and Niiyama Lab I tested compact neural networks instead, on signals measured from the real device. A small 1D CNN cut the error 2.5 times, and a 6.2k-parameter CNN even beat a 96.7k-parameter MLP. But when the detectors roll off more steeply, the CNN falls behind in the high band.</p>
+          <p data-i18n="r3">So I designed a hybrid readout. The CNN handles the low frequencies, linear regression takes the high band, and the crossover point is picked on validation data. It was never worse than the linear baseline on average in any setting I tested, and in a simulator calibrated to the device it also rebuilt images 2.1 to 3.8 times more accurately.</p>
+          <div class="bars" id="bars" role="figure" aria-labelledby="barsTitle">
+            <div class="bars-head">
+              <h3 id="barsTitle" data-i18n="bH">Reconstruction error by readout</h3>
+              <div class="seg" role="group" aria-label="Detector type">
+                <button type="button" class="segb" data-order="2" aria-pressed="true" data-i18n="bO2">Standard detector</button>
+                <button type="button" class="segb" data-order="4" aria-pressed="false" data-i18n="bO4">Steeper detector</button>
+              </div>
+            </div>
+            <p class="src" data-i18n="bUnit">NMSE, lower is better. Wins: folds out of 10 that beat linear regression.</p>
+            <div class="bar" data-k="ridge"><span class="nm" data-i18n="bLin">Linear (ridge)</span><span class="track"><span class="fill"></span></span><span class="v">0.087</span><span class="w" data-i18n="bBase">baseline</span></div>
+            <div class="bar" data-k="mlp"><span class="nm">MLP</span><span class="track"><span class="fill"></span></span><span class="v">0.060</span><span class="w">8/10</span></div>
+            <div class="bar" data-k="cnn"><span class="nm">1D CNN</span><span class="track"><span class="fill"></span></span><span class="v">0.035</span><span class="w">10/10</span></div>
+            <div class="bar best" data-k="hyb"><span class="nm" data-i18n="bHyb">Hybrid (mine)</span><span class="track"><span class="fill"></span></span><span class="v">0.035</span><span class="w">10/10</span></div>
+            <p class="src" id="barsNote">Second-order detector, as in the original experiment. Leave-one-waveform-out cross-validation on measured data. The CNN and the hybrid both win all 10 folds.</p>
+          </div>
+          <div class="paper">
+            <strong>A Hybrid Neural Network Readout for Bandwidth Expansion in Photonic Reservoir-Based Ultrafast Optical Sensing</strong>
+            <span data-i18n="pAuth">Dionisius Felysto Bagastama, Achmad Lukman, I Wayan Palton Anuwiksa. Telkom University.</span>
+            <span data-i18n="pVenue">Accepted at ICICyTA 2026. The paper link goes up after the conference in December 2026.</span>
+          </div>
+        </div>
+        <div class="photos">
+          <figure>
+            <img src="img/lab-scope.jpg" alt="A Tektronix DPO 72504DX oscilloscope with blue cables on a lab bench" width="1400" height="1050" loading="lazy">
+            <figcaption data-i18n="ph1">The 25 GHz oscilloscope at the lab. Its four channel colors gave this site its palette.</figcaption>
+          </figure>
+          <figure>
+            <img src="img/lab-selfie.jpg" alt="Dio and his assistant supervisor smiling and making peace signs in front of a whiteboard about reservoir computing" width="1400" height="1050" loading="lazy">
+            <figcaption data-i18n="ph2">With my assistant supervisor, in front of a whiteboard full of reservoir computing.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Ch2: demo -->
+  <section class="band" id="demo">
+    <div class="wrap">
+      <p class="chtag t2">Ch 2</p>
+      <h2 data-i18n="tH">Try it: rebuild a fast signal</h2>
+      <p class="demo-intro" data-i18n="tI">The white line is a fast signal. The faint blue line is what one slow detector sees. Pick a readout and a detector, and see how well each readout rebuilds the original.</p>
+      <div class="demo">
+        <div class="demo-screen">
+          <div class="demo-stage"><canvas id="demoCanvas" aria-hidden="true"></canvas></div>
+          <div class="legend">
+            <span><i style="background:#ffffff"></i><span data-i18n="lgSig">Real signal</span></span>
+            <span><i style="background:#5fb7d6; opacity:.6"></i><span data-i18n="lgDet">One slow detector</span></span>
+            <span><i id="legRec" style="background:#3cb56a"></i><span data-i18n="lgRec">Reconstruction</span></span>
+          </div>
+        </div>
+        <div class="demo-panel">
+          <fieldset>
+            <legend data-i18n="tReadout">Readout</legend>
+            <div class="pills" id="pickReadout">
+              <button type="button" class="pill" data-r="ridge" style="--pc:#a9b8c6" aria-pressed="false" data-i18n="bLin">Linear (ridge)</button>
+              <button type="button" class="pill" data-r="mlp" style="--pc:#e9c42a" aria-pressed="false">MLP</button>
+              <button type="button" class="pill" data-r="cnn" style="--pc:#27a6d6" aria-pressed="false">1D CNN</button>
+              <button type="button" class="pill" data-r="hyb" style="--pc:#3cb56a" aria-pressed="true" data-i18n="bHyb">Hybrid (mine)</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend data-i18n="tDet">Detector</legend>
+            <div class="pills" id="pickOrder">
+              <button type="button" class="pill" data-o="2" aria-pressed="true" data-i18n="bO2">Standard detector</button>
+              <button type="button" class="pill" data-o="4" aria-pressed="false" data-i18n="bO4">Steeper detector</button>
+            </div>
+          </fieldset>
+          <div class="score">
+            <span data-i18n="tScore">Average error in the paper (NMSE)</span>
+            <b id="demoNmse">0.035</b>
+            <span id="demoVerdict"></span>
+          </div>
+          <div class="bands" id="demoBands" aria-label="Error by frequency band">
+            <div class="band-row"><span data-i18n="tB1">0 to 1 GHz</span><span class="track"><span class="fill"></span></span><span class="v">0.056</span></div>
+            <div class="band-row"><span data-i18n="tB2">1 to 5 GHz</span><span class="track"><span class="fill"></span></span><span class="v">0.007</span></div>
+            <div class="band-row"><span data-i18n="tB3">5 to 10 GHz</span><span class="track"><span class="fill"></span></span><span class="v">0.006</span></div>
+          </div>
+          <button type="button" class="btn" id="newSignal" data-i18n="tNew">New signal</button>
+        </div>
+      </div>
+      <p class="demo-note" data-i18n="tNote">This is an illustration, not the model running in your browser. The error added in each frequency band matches what the paper measured for that readout and detector.</p>
+    </div>
+  </section>
+
+  <!-- Ch2: projects -->
+  <section class="band" id="projects">
+    <div class="wrap">
+      <p class="chtag t2">Ch 2</p>
+      <h2 data-i18n="prH">Things I've built</h2>
+      <ul class="cards">
+        <li class="card">
+          <div class="card-inner">
+            <div class="face front">
+              <p class="meta" data-i18n="d1m">Kaggle competition, team 00 Raiser</p>
+              <h3>DATASCAPE 2026</h3>
+              <p class="hook" data-i18n="c1h">Sorting e-commerce package photos by quality, with my group.</p>
+              <p class="stack-front">Python, ConvNeXt V2, Kaggle</p>
+              <button type="button" class="flipbtn" aria-expanded="false" data-i18n="cFlip">How it went</button>
+            </div>
+            <div class="face back" inert>
+              <h3>DATASCAPE 2026</h3>
+              <b data-i18n="cHard">The hard part</b>
+              <p data-i18n="c1a">Only 3 submissions a day, and our grade depended on the leaderboard. Our holdout score (0.905 Macro F1) also came out higher than the public leaderboard (0.812).</p>
+              <b data-i18n="cDid">What I did</b>
+              <p data-i18n="c1b">Designed the models with my group, a 3-model ConvNeXt V2 ensemble. I also built the final notebook and wrote the solution write-up.</p>
+              <p class="stack">Python, ConvNeXt V2, Kaggle</p>
+              <button type="button" class="flipbtn" data-i18n="cBack">Flip back</button>
+            </div>
+          </div>
+        </li>
+        <li class="card">
+          <div class="card-inner">
+            <div class="face front">
+              <p class="meta" data-i18n="d2m">Internship at CV. Galatika Media Multi, 2026</p>
+              <h3 data-i18n="d2t">WhatsApp for a cooperative's ERP</h3>
+              <p class="hook" data-i18n="c2h">Teaching an old cooperative ERP to talk on WhatsApp.</p>
+              <p class="stack-front">Python, ODBC, Sybase, WhatsApp</p>
+              <button type="button" class="flipbtn" aria-expanded="false" data-i18n="cFlip">How it went</button>
+            </div>
+            <div class="face back" inert>
+              <h3 data-i18n="d2t">WhatsApp for a cooperative's ERP</h3>
+              <b data-i18n="cHard">The hard part</b>
+              <p data-i18n="c2a">The ERP runs on Clarion and Sybase with no modern API, and members send their payment proofs as photos in chat.</p>
+              <b data-i18n="cDid">What I did</b>
+              <p data-i18n="c2b">Connected Python services to the ERP database over ODBC to send dues reminders and store replies. Then added AI filtering that checks amount, date and account on each proof and passes unsure cases to staff.</p>
+              <p class="stack">Python, ODBC, Sybase, WhatsApp</p>
+              <button type="button" class="flipbtn" data-i18n="cBack">Flip back</button>
+            </div>
+          </div>
+        </li>
+        <li class="card">
+          <div class="card-inner">
+            <div class="face front">
+              <p class="meta" data-i18n="c3m">Android app, Kotlin</p>
+              <h3 data-i18n="d3t">Emergency WhatsApp caller</h3>
+              <p class="hook" data-i18n="c3h">One tap to reach the family, built for my grandmother's caregiver.</p>
+              <p class="stack-front">Kotlin, Android, GitHub Actions</p>
+              <button type="button" class="flipbtn" aria-expanded="false" data-i18n="cFlip">How it went</button>
+            </div>
+            <div class="face back" inert>
+              <h3 data-i18n="d3t">Emergency WhatsApp caller</h3>
+              <b data-i18n="cHard">The hard part</b>
+              <p data-i18n="c3a">The relative who looks after my grandmother finds phones hard to use, and her phone has data but not always credit. I also had no laptop at the time.</p>
+              <b data-i18n="cDid">What I did</b>
+              <p data-i18n="c3b">Built the app from my phone and compiled the APK with GitHub Actions. Each family member gets a notification with their name and photo, and one tap starts a WhatsApp call.</p>
+              <p class="stack">Kotlin, Android, GitHub Actions</p>
+              <a href="https://github.com/DionisiusFB/telepon-darurat-wa" target="_blank" rel="noopener" data-i18n="code">See the code</a>
+              <button type="button" class="flipbtn" data-i18n="cBack">Flip back</button>
+            </div>
+          </div>
+        </li>
+        <li class="card">
+          <div class="card-inner">
+            <div class="face front">
+              <p class="meta" data-i18n="d4m">HACKATTACK hackathon, 5th place</p>
+              <h3>BaSik (Baca Asik)</h3>
+              <p class="hook" data-i18n="c4h">A reading app that gets kids excited about Indonesian folk stories.</p>
+              <p class="stack-front">HTML, JavaScript, AI</p>
+              <button type="button" class="flipbtn" aria-expanded="false" data-i18n="cFlip">How it went</button>
+            </div>
+            <div class="face back" inert>
+              <h3>BaSik (Baca Asik)</h3>
+              <b data-i18n="cHard">The hard part</b>
+              <p data-i18n="c4a">Many children in villages get fewer chances at good learning than children in cities.</p>
+              <b data-i18n="cDid">What I did</b>
+              <p data-i18n="c4b">With my team, built a reading app with AI help around folk stories like Si Pitung, Tangkuban Perahu and Danau Toba, made for kids outside cities too. We placed 5th.</p>
+              <p class="stack">HTML, JavaScript, AI</p>
+              <button type="button" class="flipbtn" data-i18n="cBack">Flip back</button>
+            </div>
+          </div>
+        </li>
+        <li class="card">
+          <div class="card-inner">
+            <div class="face front">
+              <p class="meta" data-i18n="d5m">Digital Image Processing final project</p>
+              <h3 data-i18n="d5t">Batik motif classification</h3>
+              <p class="hook" data-i18n="c5h">Can a classic pipeline beat deep learning on batik motifs?</p>
+              <p class="stack-front">Python, scikit-learn, MobileNetV2</p>
+              <button type="button" class="flipbtn" aria-expanded="false" data-i18n="cFlip">How it went</button>
+            </div>
+            <div class="face back" inert>
+              <h3 data-i18n="d5t">Batik motif classification</h3>
+              <b data-i18n="cHard">The hard part</b>
+              <p data-i18n="c5a">Choosing between hand-made texture features and a pretrained deep network for classifying motifs.</p>
+              <b data-i18n="cDid">What I did</b>
+              <p data-i18n="c5b">Compared GLCM and LBP features with an SVM against MobileNetV2. The classic pipeline won with 71.4% accuracy, so now I always test a simple baseline first.</p>
+              <p class="stack">Python, scikit-learn, MobileNetV2</p>
+              <a href="https://github.com/DionisiusFB/batik-motif-classification" target="_blank" rel="noopener" data-i18n="code">See the code</a>
+              <button type="button" class="flipbtn" data-i18n="cBack">Flip back</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div class="more">
+        <div><b>StrayConnected</b><span data-i18n="m1">Pet adoption platform that connects shelters with adopters. I built the web app.</span></div>
+        <div><b>ATHRONATX</b><span data-i18n="m2">Windows security app by a team of eight. I wrote the software requirements specification.</span></div>
+        <div><b>GLOW 2025</b><span data-i18n="m3">Breast cancer classification on the Wisconsin diagnostic dataset.</span></div>
+        <div><b>ADIKARA 2026</b><span data-i18n="m4">Predicting likes on Indonesian tweets. In progress.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ch2: experience -->
+  <section class="band" id="experience">
+    <div class="wrap">
+      <p class="chtag t2">Ch 2</p>
+      <h2 data-i18n="xH">Where I've worked and helped</h2>
+      <ul class="xp">
+        <li><span class="when" data-i18n="x1w">Sep to Nov 2026</span><span><b data-i18n="x1">Database Programmer intern, CV. Galatika Media Multi</b><span data-i18n="x1d">WhatsApp integration for a cooperative ERP, Bandung</span></span></li>
+        <li><span class="when" data-i18n="x2w">Apr to Aug 2026</span><span><b data-i18n="x2">Research Assistant, Sunada and Niiyama Lab, Kanazawa University</b><span data-i18n="x2d">KUEP exchange. Neural network readouts for ultrafast optical sensing</span></span></li>
+        <li><span class="when" data-i18n="x3w">Nov 2025 to now</span><span><b data-i18n="x3">Editor Assistant, Humanity journal, CoE HUMIC Telkom University</b></span></li>
+        <li><span class="when">2025</span><span><b data-i18n="x4">Editor, IEEE ICoDSA 2025 and IEEE ICoICT 2025</b><span data-i18n="x4d">Checked and formatted papers to IEEE standards</span></span></li>
+        <li><span class="when">2025</span><span><b data-i18n="x5">Secretary volunteer, ICoSEIT 2025, and Liaison Officer for international students</b></span></li>
+        <li><span class="when" data-i18n="x6w">2025 to now</span><span><b data-i18n="x6">KSR-PMI, Student Volunteer HR, KMK mentor</b><span data-i18n="x6d">Campus organizations at Telkom University</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Ch3: diagonal -->
+  <section class="band" id="diagonal">
+    <div class="wrap">
+      <div class="sheet diag-sheet">
+        <p class="chtag t3">Ch 3</p>
+        <h2 data-i18n="dgH">The diagonal</h2>
+        <p class="diag-intro" data-i18n="dgI">Friends know me for one habit: when there are two obvious options, I look for a third. So here is the side of me that doesn't fit on a CV.</p>
+        <div class="diag-grid">
+          <ul class="funfacts">
+            <li><button type="button" id="tvFact" data-i18n="f1">I was on TV: Green Team, Taro Rangers, Global TV, 2015.</button></li>
+            <li data-i18n="f2">1st place in my high school's e-sports competition.</li>
+            <li data-i18n="f3">Chef assistant for an event at BHIFEX Bandung.</li>
+            <li data-i18n="f4">Made hotel beds part-time while studying in Kanazawa.</li>
+            <li data-i18n="f5">Plays Warframe, Baldur's Gate 3 and Divinity: Original Sin 2. Builds Pokémon teams around odd combos.</li>
+          </ul>
+          <div class="diag-photos">
+            <figure>
+              <img src="img/meteor.jpg" alt="Dio in a trench coat at the Kanazawa University bridge, gesturing at an edited flaming laptop falling from the sky" width="896" height="1195" loading="lazy">
+              <figcaption data-i18n="dp1">Summoning my laptop at Kanazawa University. Yes, it's edited.</figcaption>
+            </figure>
+            <figure>
+              <img src="img/shiramine.jpg" alt="Dio and friends sitting on river rocks in a green mountain valley, holding up stones" width="738" height="1280" loading="lazy">
+              <figcaption data-i18n="dp2">Rock collecting with friends on the way up a mountain in Shiramine.</figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="secrets" aria-live="polite">
+          <span id="secretsText">Secrets found: 0 of 5</span>
+          <span class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <h2 data-i18n="cH">Say hi</h2>
+      <p data-i18n="cP">Hiring for an AI role, working on something with light or data, or just want to talk games? Email me at dionisiusfelysto1@gmail.com, or find me on LinkedIn and GitHub.</p>
+      <div class="actions">
+        <a class="btn solid" href="https://www.linkedin.com/in/dionisius-felysto-bagastama-45383933a/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn" href="https://github.com/DionisiusFB" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Piko -->
+<div class="piko-root" id="pikoRoot">
+  <div class="dialog" id="dialog" role="dialog" aria-label="Piko, the site guide" hidden>
+    <div class="who"><span>Piko</span><span><button type="button" id="soundBtn" aria-pressed="false" data-i18n="soundOff">Sound off</button><button type="button" id="hideBtn" data-i18n="hide">Hide</button></span></div>
+    <div class="say" id="say" aria-live="polite"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+  <button class="peek" id="peekBtn" type="button" hidden aria-label="Show Piko's last message">…</button>
+  <button class="piko-btn" id="pikoBtn" type="button" aria-label="Talk to Piko">
+    <svg class="piko-svg" viewBox="0 0 80 74" aria-hidden="true">
+      <path class="wave" d="M28 14 q4 -7 8 0 t8 0 t8 0" fill="none" stroke="#3cb56a" stroke-width="2.4" stroke-linecap="round"/>
+      <rect x="8" y="20" width="64" height="44" rx="22" fill="#effaf3" stroke="#3cb56a" stroke-width="2.5"/>
+      <ellipse class="eye" cx="30" cy="40" rx="4.2" ry="5.6" fill="#17243f"/>
+      <ellipse class="eye" cx="50" cy="40" rx="4.2" ry="5.6" fill="#17243f"/>
+      <path class="sleep-eye" d="M25 41 q5 4 10 0 M45 41 q5 4 10 0" fill="none" stroke="#17243f" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M35 51 q5 4 10 0" fill="none" stroke="#17243f" stroke-width="2.2" stroke-linecap="round"/>
+      <ellipse cx="21" cy="48" rx="4" ry="2.4" fill="#f6b8cf" opacity=".8"/>
+      <ellipse cx="59" cy="48" rx="4" ry="2.4" fill="#f6b8cf" opacity=".8"/>
+      <text class="zz" x="64" y="18">z</text>
+    </svg>
+  </button>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const store = {
+    get(k) { try { return localStorage.getItem("dio." + k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem("dio." + k, v); } catch (e) {} }
+  };
+  /* "hide Piko" lasts for this visit only */
+  const sess = {
+    get(k) { try { return sessionStorage.getItem("dio." + k); } catch (e) { return null; } },
+    set(k, v) { try { sessionStorage.setItem("dio." + k, v); } catch (e) {} }
+  };
+  /* Animations follow the device's "reduce motion" setting, unless the visitor chose otherwise */
+  const osReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionPref = store.get("motion");
+  const reduceMotion = motionPref === "off" || (motionPref !== "on" && osReduce);
+  document.documentElement.classList.toggle("still", reduceMotion);
+  const small = window.matchMedia("(max-width: 700px)");
+
+  /* ---------------- text, EN and ID ---------------- */
+  const T = {
+    en: {
+      langBtn: "Bahasa Indonesia", modeNight: "Night mode", modeDay: "Day mode",
+      recOn: "Recruiter mode", recOff: "Exit recruiter mode",
+      recBanner: "Recruiter mode is on: no effects, no detours. Everything important is right below.",
+      hi: "Hi, I'm Dio.", h1a: "I build AI that", h1b: "reads light.",
+      lede: "Final-year Informatics student at Telkom University. I spent a semester at Kanazawa University in Japan, teaching neural networks to rebuild light signals that are too fast for ordinary detectors. Now looking for AI internships and roles.",
+      scopeL: "Input: one fast signal", scopeR: "Pick a channel",
+      p1: "The 30-second version", p1s: "For busy recruiters",
+      p2: "The full story", p2s: "Research, projects, experience",
+      p3: "The diagonal", p3s: "The side that doesn't fit on a CV",
+      scopeFoot: "Like in my research: a tiny cavity spreads one fast signal over several slower channels. Here, each channel is a way to read me.",
+      qH: "The 30-second version", qWho: "Who", qWhoV: "Dio. S1 Informatics, International Class (2023 intake), Telkom University, Bandung, Indonesia.",
+      qWant: "Looking for", qWantV: "AI and machine learning internships now, and a full-time AI role after I graduate.",
+      qRes: "Research", qResV: "A hybrid neural network readout for photonic reservoir sensing. First-author paper accepted at ICICyTA 2026.",
+      qExp: "Experience", qExpV: "Research Assistant, Kanazawa University (2026). Database Programmer intern, CV. Galatika Media Multi (2026). Editor for IEEE ICoDSA and ICoICT 2025.",
+      qTools: "Tools", qLang: "Languages", qLangV: "English (TOEIC 845), Bahasa Indonesia, Sundanese, Javanese. Learning Japanese.",
+      aEmail: "Show my email", aCv: "Get my CV (PDF)",
+      rH: "Research: helping slow detectors see fast light",
+      r1: "A photodetector can be fast or sensitive, but rarely both. A photonic reservoir, here a tiny silicon microcavity, spreads one fast optical signal over nine slower detector channels. A readout model then rebuilds the original signal from those channels.",
+      r2: "The usual readout is plain linear regression, picked because it is cheap to train. At the Sunada and Niiyama Lab I tested compact neural networks instead, on signals measured from the real device. A small 1D CNN cut the error 2.5 times, and a 6.2k-parameter CNN even beat a 96.7k-parameter MLP. But when the detectors roll off more steeply, the CNN falls behind in the high band.",
+      r3: "So I designed a hybrid readout. The CNN handles the low frequencies, linear regression takes the high band, and the crossover point is picked on validation data. It was never worse than the linear baseline on average in any setting I tested, and in a simulator calibrated to the device it also rebuilt images 2.1 to 3.8 times more accurately.",
+      bH: "Reconstruction error by readout", bO2: "Standard detector", bO4: "Steeper detector",
+      bUnit: "NMSE, lower is better. Wins: folds out of 10 that beat linear regression.",
+      bLin: "Linear (ridge)", bBase: "baseline", bHyb: "Hybrid (mine)",
+      bN2: "Second-order detector, as in the original experiment. Leave-one-waveform-out cross-validation on measured data. The CNN and the hybrid both win all 10 folds.",
+      bN4: "Fourth-order detector, closer to real detection chains. The CNN now falls behind linear regression and the MLP fails, but the hybrid still wins 9 of 10 folds.",
+      pAuth: "Dionisius Felysto Bagastama, Achmad Lukman, I Wayan Palton Anuwiksa. Telkom University.",
+      pVenue: "Accepted at ICICyTA 2026. The paper link goes up after the conference in December 2026.",
+      ph1: "The 25 GHz oscilloscope at the lab. Its four channel colors gave this site its palette.",
+      ph2: "With my assistant supervisor, in front of a whiteboard full of reservoir computing.",
+      prH: "Things I've built",
+      d1m: "Kaggle competition, team 00 Raiser",
+      d1: "Sorting e-commerce package photos by quality. Together with my group I designed the models, a 3-model ConvNeXt V2 ensemble that reached up to 0.905 Macro F1 on our holdout set and 0.812 on the public leaderboard. I also built the final notebook and wrote the solution write-up.",
+      d2t: "WhatsApp for a cooperative's ERP", d2m: "Internship at CV. Galatika Media Multi, 2026",
+      d2: "A Bandung civil servants' cooperative runs on an old Clarion and Sybase ERP. I connected it to WhatsApp with Python services over ODBC, so it can send dues reminders and store members' replies. Then I added AI filtering that reads payment proofs, checks amount, date and account, and sends unsure cases to staff.",
+      d3t: "Emergency WhatsApp caller",
+      d3: "My grandmother is looked after by a relative who finds phones hard to use. So I built an Android app, from my own phone, that puts each family member on a one-tap notification that starts a WhatsApp call. WhatsApp, because her phone always has data but not always credit. The APK is built with GitHub Actions.",
+      code: "See the code",
+      d4m: "HACKATTACK hackathon, 5th place",
+      d4: "A reading app with AI help that gets children excited about Indonesian folk stories. We designed it for kids in villages as much as in cities, where good learning tools are harder to find.",
+      d5t: "Batik motif classification", d5m: "Digital Image Processing final project",
+      d5: "Classic features (GLCM and LBP with an SVM) against deep learning (MobileNetV2). The classic pipeline won with 71.4% accuracy, a good reminder that the bigger model is not always the better one.",
+      m1: "Pet adoption platform that connects shelters with adopters. I built the web app.",
+      m2: "Windows security app by a team of eight. I wrote the software requirements specification.",
+      m3: "Breast cancer classification on the Wisconsin diagnostic dataset.",
+      m4: "Predicting likes on Indonesian tweets. In progress.",
+      xH: "Where I've worked and helped",
+      x1w: "Sep to Nov 2026", x1: "Database Programmer intern, CV. Galatika Media Multi", x1d: "WhatsApp integration for a cooperative ERP, Bandung",
+      x2w: "Apr to Aug 2026", x2: "Research Assistant, Sunada and Niiyama Lab, Kanazawa University", x2d: "KUEP exchange. Neural network readouts for ultrafast optical sensing",
+      x3w: "Nov 2025 to now", x3: "Editor Assistant, Humanity journal, CoE HUMIC Telkom University",
+      x4: "Editor, IEEE ICoDSA 2025 and IEEE ICoICT 2025", x4d: "Checked and formatted papers to IEEE standards",
+      x5: "Secretary volunteer, ICoSEIT 2025, and Liaison Officer for international students",
+      x6w: "2025 to now", x6: "KSR-PMI, Student Volunteer HR, KMK mentor", x6d: "Campus organizations at Telkom University",
+      dgH: "The diagonal",
+      dgI: "Friends know me for one habit: when there are two obvious options, I look for a third. So here is the side of me that doesn't fit on a CV.",
+      f1: "I was on TV: Green Team, Taro Rangers, Global TV, 2015.",
+      f2: "1st place in my high school's e-sports competition.",
+      f3: "Chef assistant for an event at BHIFEX Bandung.",
+      f4: "Made hotel beds part-time while studying in Kanazawa.",
+      f5: "Plays Warframe, Baldur's Gate 3 and Divinity: Original Sin 2. Builds Pokémon teams around odd combos.",
+      dp1: "Summoning my laptop at Kanazawa University. Yes, it's edited.",
+      dp2: "Rock collecting with friends on the way up a mountain in Shiramine.",
+      secrets: (n) => `Secrets found: ${n} of 5`,
+      cH: "Say hi",
+      cP: "Hiring for an AI role, working on something with light or data, or just want to talk games? Email me at dionisiusfelysto1@gmail.com, or find me on LinkedIn and GitHub.",
+      animOn: "Animations on", animOff: "Animations off",
+      jH: "How I got here", jSub: "Bandung to Kanazawa and back. Scroll and follow the light.",
+      j1: "Started S1 Informatics in the International Class at Telkom University.",
+      j2: "Became an editor for two IEEE conferences, ICoDSA and ICoICT, and joined the Humanity journal team.",
+      j3: "5th place at HACKATTACK with BaSik, a reading app for kids.",
+      jw4: "Spring 2026", j4: "Flew about 5,700 km to Japan for the KUEP exchange and joined the Sunada and Niiyama Lab.",
+      j5: "A UNESCO field trip to Shiramine and Mount Hakusan. Between lab days, I made hotel beds part-time and kept learning Japanese.",
+      jw6: "Aug 2026", j6: "Flew home with a research result to write up.",
+      jw7: "Sep to Nov 2026", j7: "Internship at CV. Galatika Media Multi, and DATASCAPE 2026 with my group.",
+      j8: "Paper accepted at ICICyTA 2026. The conference is in December.",
+      jCap: "Bandung 6.9° S, 107.6° E. Kanazawa 36.6° N, 136.7° E. About 5,700 km apart.",
+      tH: "Try it: rebuild a fast signal",
+      tI: "The white line is a fast signal. The faint blue line is what one slow detector sees. Pick a readout and a detector, and see how well each readout rebuilds the original.",
+      lgSig: "Real signal", lgDet: "One slow detector", lgRec: "Reconstruction",
+      tReadout: "Readout", tDet: "Detector", tScore: "Average error in the paper (NMSE)",
+      tB1: "0 to 1 GHz", tB2: "1 to 5 GHz", tB3: "5 to 10 GHz", tNew: "New signal",
+      tNote: "This is an illustration, not the model running in your browser. The error added in each frequency band matches what the paper measured for that readout and detector.",
+      v_ridge2: "The baseline. Strong in the high band, but misses much of the slow part.",
+      v_mlp2: "Better than linear overall, but five times worse above 5 GHz.",
+      v_cnn2: "2.5 times less error than linear, and wins all 10 folds.",
+      v_hyb2: "Matches the CNN here, and is best or tied in every band.",
+      v_ridge4: "Holds up. Its closed-form fit still recovers the high band.",
+      v_mlp4: "Fails badly, with more than six times the baseline's error.",
+      v_cnn4: "Breaks in the high band and ends up 1.8 times worse than linear.",
+      v_hyb4: "Hands the high band back to linear and still wins 9 of 10 folds.",
+      cFlip: "How it went", cBack: "Flip back", cHard: "The hard part", cDid: "What I did",
+      c3m: "Android app, Kotlin",
+      c1h: "Sorting e-commerce package photos by quality, with my group.",
+      c1a: "Only 3 submissions a day, and our grade depended on the leaderboard. Our holdout score (0.905 Macro F1) also came out higher than the public leaderboard (0.812).",
+      c1b: "Designed the models with my group, a 3-model ConvNeXt V2 ensemble. I also built the final notebook and wrote the solution write-up.",
+      c2h: "Teaching an old cooperative ERP to talk on WhatsApp.",
+      c2a: "The ERP runs on Clarion and Sybase with no modern API, and members send their payment proofs as photos in chat.",
+      c2b: "Connected Python services to the ERP database over ODBC to send dues reminders and store replies. Then added AI filtering that checks amount, date and account on each proof and passes unsure cases to staff.",
+      c3h: "One tap to reach the family, built for my grandmother's caregiver.",
+      c3a: "The relative who looks after my grandmother finds phones hard to use, and her phone has data but not always credit. I also had no laptop at the time.",
+      c3b: "Built the app from my phone and compiled the APK with GitHub Actions. Each family member gets a notification with their name and photo, and one tap starts a WhatsApp call.",
+      c4h: "A reading app that gets kids excited about Indonesian folk stories.",
+      c4a: "Many children in villages get fewer chances at good learning than children in cities.",
+      c4b: "With my team, built a reading app with AI help around folk stories like Si Pitung, Tangkuban Perahu and Danau Toba, made for kids outside cities too. We placed 5th.",
+      c5h: "Can a classic pipeline beat deep learning on batik motifs?",
+      c5a: "Choosing between hand-made texture features and a pretrained deep network for classifying motifs.",
+      c5b: "Compared GLCM and LBP features with an SVM against MobileNetV2. The classic pipeline won with 71.4% accuracy, so now I always test a simple baseline first.",
+      soundOff: "Sound off", soundOn: "Sound on", hide: "Hide"
+    },
+    id: {
+      langBtn: "English", modeNight: "Mode malam", modeDay: "Mode siang",
+      recOn: "Mode recruiter", recOff: "Keluar mode recruiter",
+      recBanner: "Mode recruiter aktif: tanpa efek, tanpa jalan memutar. Semua yang penting ada di bawah.",
+      hi: "Halo, saya Dio.", h1a: "Saya membuat AI yang", h1b: "membaca cahaya.",
+      lede: "Mahasiswa tingkat akhir Informatika di Telkom University. Saya menghabiskan satu semester di Kanazawa University, Jepang, melatih neural network untuk merekonstruksi sinyal cahaya yang terlalu cepat bagi detektor biasa. Sekarang sedang mencari magang dan pekerjaan di bidang AI.",
+      scopeL: "Input: satu sinyal cepat", scopeR: "Pilih channel",
+      p1: "Versi 30 detik", p1s: "Untuk recruiter yang sibuk",
+      p2: "Cerita lengkap", p2s: "Riset, proyek, pengalaman",
+      p3: "Jalur diagonal", p3s: "Sisi saya yang tidak muat di CV",
+      scopeFoot: "Seperti di riset saya: sebuah rongga kecil menyebarkan satu sinyal cepat ke beberapa channel yang lebih lambat. Di sini, tiap channel adalah cara untuk mengenal saya.",
+      qH: "Versi 30 detik", qWho: "Siapa", qWhoV: "Dio. S1 Informatika, Kelas Internasional (angkatan 2023), Telkom University, Bandung.",
+      qWant: "Mencari", qWantV: "Magang di bidang AI dan machine learning sekarang, lalu posisi full-time di bidang AI setelah lulus.",
+      qRes: "Riset", qResV: "Readout hybrid neural network untuk penginderaan dengan photonic reservoir. Paper sebagai penulis pertama diterima di ICICyTA 2026.",
+      qExp: "Pengalaman", qExpV: "Research Assistant, Kanazawa University (2026). Magang Database Programmer, CV. Galatika Media Multi (2026). Editor untuk IEEE ICoDSA dan ICoICT 2025.",
+      qTools: "Alat", qLang: "Bahasa", qLangV: "Inggris (TOEIC 845), Indonesia, Sunda, Jawa. Sedang belajar bahasa Jepang.",
+      aEmail: "Tampilkan email", aCv: "Unduh CV (PDF)",
+      rH: "Riset: membantu detektor lambat melihat cahaya cepat",
+      r1: "Fotodetektor bisa cepat atau sensitif, tapi jarang keduanya. Sebuah photonic reservoir, di sini berupa rongga mikro dari silikon, menyebarkan satu sinyal optik yang cepat ke sembilan channel detektor yang lebih lambat. Lalu sebuah model readout membangun ulang sinyal aslinya dari channel tersebut.",
+      r2: "Readout yang biasa dipakai adalah regresi linear, karena murah untuk dilatih. Di Sunada and Niiyama Lab saya menguji neural network yang ringkas sebagai gantinya, memakai sinyal yang diukur langsung dari perangkatnya. 1D CNN kecil memangkas error 2,5 kali, dan CNN dengan 6,2 ribu parameter bahkan mengalahkan MLP dengan 96,7 ribu parameter. Tapi saat roll-off detektor makin curam, CNN tertinggal di frekuensi tinggi.",
+      r3: "Jadi saya merancang readout hybrid. CNN menangani frekuensi rendah, regresi linear mengambil frekuensi tinggi, dan titik peralihannya dipilih dari data validasi. Rata-ratanya tidak pernah lebih buruk dari baseline linear di semua kondisi yang saya uji, dan di simulator yang dikalibrasi ke perangkat aslinya, readout ini juga merekonstruksi gambar 2,1 sampai 3,8 kali lebih akurat.",
+      bH: "Error rekonstruksi per readout", bO2: "Detektor standar", bO4: "Detektor lebih curam",
+      bUnit: "NMSE, makin kecil makin baik. Menang: jumlah fold dari 10 yang mengalahkan regresi linear.",
+      bLin: "Linear (ridge)", bBase: "baseline", bHyb: "Hybrid (buatan saya)",
+      bN2: "Detektor orde dua, seperti di eksperimen aslinya. Leave-one-waveform-out cross-validation pada data hasil pengukuran. CNN dan hybrid sama-sama menang di semua 10 fold.",
+      bN4: "Detektor orde empat, lebih dekat dengan rangkaian deteksi sungguhan. CNN kini kalah dari regresi linear dan MLP gagal, tapi hybrid tetap menang di 9 dari 10 fold.",
+      pAuth: "Dionisius Felysto Bagastama, Achmad Lukman, I Wayan Palton Anuwiksa. Telkom University.",
+      pVenue: "Diterima di ICICyTA 2026. Link paper akan dipasang setelah konferensi pada Desember 2026.",
+      ph1: "Osiloskop 25 GHz di lab. Empat warna channel-nya jadi palet warna situs ini.",
+      ph2: "Bersama asisten pembimbing saya, di depan papan tulis penuh reservoir computing.",
+      prH: "Yang pernah saya buat",
+      d1m: "Kompetisi Kaggle, tim 00 Raiser",
+      d1: "Memilah foto paket e-commerce berdasarkan kualitasnya. Bersama kelompok saya, kami merancang modelnya, yaitu ensemble 3 model ConvNeXt V2 yang mencapai Macro F1 sampai 0,905 di data holdout dan 0,812 di leaderboard publik. Saya juga menyusun notebook final dan menulis write-up solusinya.",
+      d2t: "WhatsApp untuk ERP koperasi", d2m: "Magang di CV. Galatika Media Multi, 2026",
+      d2: "Sebuah koperasi pegawai pemerintah di Bandung memakai ERP lama berbasis Clarion dan Sybase. Saya menghubungkannya ke WhatsApp dengan layanan Python lewat ODBC, supaya bisa mengirim pengingat iuran dan menyimpan balasan anggota. Lalu saya menambahkan penyaring AI yang membaca bukti transfer, mengecek jumlah, tanggal dan rekening, dan meneruskan kasus yang meragukan ke staf.",
+      d3t: "Tombol panggilan darurat WhatsApp",
+      d3: "Nenek saya dirawat oleh saudara yang kesulitan memakai HP. Jadi saya membuat aplikasi Android, langsung dari HP saya, yang menaruh tiap anggota keluarga sebagai notifikasi sekali-tekan untuk memulai panggilan WhatsApp. Kenapa WhatsApp? Karena HP-nya selalu ada kuota, tapi belum tentu ada pulsa. APK-nya dibangun dengan GitHub Actions.",
+      code: "Lihat kodenya",
+      d4m: "Hackathon HACKATTACK, juara 5",
+      d4: "Aplikasi membaca dengan bantuan AI yang membuat anak-anak semangat membaca cerita rakyat Indonesia. Kami merancangnya untuk anak-anak di desa sama seperti di kota, karena di desa sarana belajar yang baik lebih sulit didapat.",
+      d5t: "Klasifikasi motif batik", d5m: "Proyek akhir Pengolahan Citra Digital",
+      d5: "Fitur klasik (GLCM dan LBP dengan SVM) melawan deep learning (MobileNetV2). Pipeline klasik menang dengan akurasi 71,4%, pengingat bahwa model yang lebih besar belum tentu lebih baik.",
+      m1: "Platform adopsi hewan yang menghubungkan shelter dengan calon adopter. Saya membuat aplikasi web-nya.",
+      m2: "Aplikasi keamanan Windows oleh tim berisi delapan orang. Saya menulis dokumen spesifikasi kebutuhan perangkat lunaknya.",
+      m3: "Klasifikasi kanker payudara pada dataset Wisconsin Diagnostic.",
+      m4: "Memprediksi jumlah likes pada tweet berbahasa Indonesia. Sedang berjalan.",
+      xH: "Tempat saya bekerja dan membantu",
+      x1w: "Sep sampai Nov 2026", x1: "Magang Database Programmer, CV. Galatika Media Multi", x1d: "Integrasi WhatsApp untuk ERP koperasi, Bandung",
+      x2w: "Apr sampai Agu 2026", x2: "Research Assistant, Sunada and Niiyama Lab, Kanazawa University", x2d: "Program pertukaran KUEP. Readout neural network untuk penginderaan optik ultracepat",
+      x3w: "Nov 2025 sampai sekarang", x3: "Editor Assistant, jurnal Humanity, CoE HUMIC Telkom University",
+      x4: "Editor, IEEE ICoDSA 2025 dan IEEE ICoICT 2025", x4d: "Memeriksa dan merapikan paper sesuai standar IEEE",
+      x5: "Sekretaris volunteer ICoSEIT 2025, dan Liaison Officer untuk mahasiswa internasional",
+      x6w: "2025 sampai sekarang", x6: "KSR-PMI, Student Volunteer bagian HR, mentor KMK", x6d: "Organisasi kampus di Telkom University",
+      dgH: "Jalur diagonal",
+      dgI: "Teman-teman kenal saya dengan satu kebiasaan: kalau ada dua pilihan yang jelas, saya cari pilihan ketiga. Jadi ini sisi saya yang tidak muat di CV.",
+      f1: "Saya pernah masuk TV: Tim Hijau, Taro Rangers, Global TV, 2015.",
+      f2: "Juara 1 kompetisi e-sports di SMA.",
+      f3: "Asisten chef untuk sebuah acara di BHIFEX Bandung.",
+      f4: "Kerja paruh waktu merapikan kasur hotel selama kuliah di Kanazawa.",
+      f5: "Main Warframe, Baldur's Gate 3 dan Divinity: Original Sin 2. Suka menyusun tim Pokémon dari kombinasi yang tidak biasa.",
+      dp1: "Memanggil laptop saya di Kanazawa University. Iya, ini editan.",
+      dp2: "Mengumpulkan batu bareng teman-teman di jalan naik gunung di Shiramine.",
+      secrets: (n) => `Rahasia ditemukan: ${n} dari 5`,
+      cH: "Sapa saya",
+      cP: "Sedang mencari orang untuk posisi AI, mengerjakan sesuatu soal cahaya atau data, atau cuma mau ngobrol soal game? Email saya di dionisiusfelysto1@gmail.com, atau temukan saya di LinkedIn dan GitHub.",
+      animOn: "Animasi nyala", animOff: "Animasi mati",
+      jH: "Perjalanan saya", jSub: "Dari Bandung ke Kanazawa dan kembali lagi. Gulir dan ikuti cahayanya.",
+      j1: "Mulai kuliah S1 Informatika di Kelas Internasional Telkom University.",
+      j2: "Menjadi editor untuk dua konferensi IEEE, ICoDSA dan ICoICT, dan bergabung dengan tim jurnal Humanity.",
+      j3: "Juara 5 HACKATTACK bersama BaSik, aplikasi membaca untuk anak-anak.",
+      jw4: "Musim semi 2026", j4: "Terbang sekitar 5.700 km ke Jepang untuk program pertukaran KUEP dan bergabung dengan Sunada and Niiyama Lab.",
+      j5: "Field trip UNESCO ke Shiramine dan Gunung Hakusan. Di sela hari-hari di lab, saya kerja paruh waktu merapikan kasur hotel dan terus belajar bahasa Jepang.",
+      jw6: "Agu 2026", j6: "Pulang membawa hasil riset untuk ditulis.",
+      jw7: "Sep sampai Nov 2026", j7: "Magang di CV. Galatika Media Multi, dan DATASCAPE 2026 bersama kelompok saya.",
+      j8: "Paper diterima di ICICyTA 2026. Konferensinya bulan Desember.",
+      jCap: "Bandung 6,9° LS, 107,6° BT. Kanazawa 36,6° LU, 136,7° BT. Jaraknya sekitar 5.700 km.",
+      tH: "Coba sendiri: bangun ulang sinyal cepat",
+      tI: "Garis putih adalah sinyal cepat. Garis biru samar adalah yang dilihat satu detektor lambat. Pilih readout dan detektor, lalu lihat seberapa baik tiap readout membangun ulang sinyal aslinya.",
+      lgSig: "Sinyal asli", lgDet: "Satu detektor lambat", lgRec: "Rekonstruksi",
+      tReadout: "Readout", tDet: "Detektor", tScore: "Rata-rata error di paper (NMSE)",
+      tB1: "0 sampai 1 GHz", tB2: "1 sampai 5 GHz", tB3: "5 sampai 10 GHz", tNew: "Sinyal baru",
+      tNote: "Ini ilustrasi, bukan model yang berjalan di browser kamu. Error yang ditambahkan di tiap pita frekuensi sesuai dengan hasil pengukuran di paper untuk readout dan detektor tersebut.",
+      v_ridge2: "Baseline. Kuat di frekuensi tinggi, tapi banyak meleset di bagian yang lambat.",
+      v_mlp2: "Secara umum lebih baik dari linear, tapi lima kali lebih buruk di atas 5 GHz.",
+      v_cnn2: "Error 2,5 kali lebih kecil dari linear, dan menang di semua 10 fold.",
+      v_hyb2: "Setara dengan CNN di sini, dan terbaik atau seri di setiap pita.",
+      v_ridge4: "Tetap bertahan. Solusi closed-form-nya masih bisa memulihkan frekuensi tinggi.",
+      v_mlp4: "Gagal total, dengan error lebih dari enam kali baseline.",
+      v_cnn4: "Rusak di frekuensi tinggi dan akhirnya 1,8 kali lebih buruk dari linear.",
+      v_hyb4: "Menyerahkan frekuensi tinggi ke linear dan tetap menang di 9 dari 10 fold.",
+      cFlip: "Ceritanya", cBack: "Balik lagi", cHard: "Bagian sulitnya", cDid: "Yang saya lakukan",
+      c3m: "Aplikasi Android, Kotlin",
+      c1h: "Memilah foto paket e-commerce berdasarkan kualitas, bersama kelompok saya.",
+      c1a: "Hanya 3 submission per hari, dan nilai kami ditentukan oleh leaderboard. Skor holdout kami (Macro F1 0,905) juga ternyata lebih tinggi dari leaderboard publik (0,812).",
+      c1b: "Merancang model bersama kelompok, yaitu ensemble 3 model ConvNeXt V2. Saya juga menyusun notebook final dan menulis write-up solusinya.",
+      c2h: "Mengajari ERP koperasi yang sudah tua untuk bicara lewat WhatsApp.",
+      c2a: "ERP-nya berjalan di Clarion dan Sybase tanpa API modern, dan anggota mengirim bukti transfer sebagai foto di chat.",
+      c2b: "Menghubungkan layanan Python ke database ERP lewat ODBC untuk mengirim pengingat iuran dan menyimpan balasan. Lalu menambahkan penyaring AI yang mengecek jumlah, tanggal dan rekening di tiap bukti, dan meneruskan kasus yang meragukan ke staf.",
+      c3h: "Sekali tekan untuk menghubungi keluarga, dibuat untuk yang merawat nenek saya.",
+      c3a: "Saudara yang merawat nenek saya kesulitan memakai HP, dan HP-nya selalu ada kuota tapi belum tentu ada pulsa. Waktu itu saya juga tidak punya laptop.",
+      c3b: "Membuat aplikasinya dari HP dan meng-compile APK dengan GitHub Actions. Tiap anggota keluarga punya notifikasi dengan nama dan foto, dan sekali tekan langsung memulai panggilan WhatsApp.",
+      c4h: "Aplikasi membaca yang membuat anak-anak semangat membaca cerita rakyat Indonesia.",
+      c4a: "Banyak anak di desa punya kesempatan belajar yang lebih sedikit dibanding anak di kota.",
+      c4b: "Bersama tim, membuat aplikasi membaca dengan bantuan AI seputar cerita rakyat seperti Si Pitung, Tangkuban Perahu dan Danau Toba, dibuat juga untuk anak-anak di luar kota. Kami juara 5.",
+      c5h: "Bisakah pipeline klasik mengalahkan deep learning untuk motif batik?",
+      c5a: "Memilih antara fitur tekstur buatan tangan dan deep network pretrained untuk mengklasifikasi motif.",
+      c5b: "Membandingkan fitur GLCM dan LBP dengan SVM melawan MobileNetV2. Pipeline klasik menang dengan akurasi 71,4%, jadi sekarang saya selalu menguji baseline sederhana terlebih dulu.",
+      soundOff: "Suara mati", soundOn: "Suara nyala", hide: "Tutup"
+    }
+  };
+
+  /* Piko's lines */
+  const P = {
+    en: {
+      greet: "Hi! I'm Piko, a photon who got lost in Dio's lab and never left. Want a tour?",
+      gQuick: "Fast version", gFull: "Full story", gDiag: "Fun stuff", gLater: "I'll explore",
+      later: "Okay! I'll be down here. Click me if you need me.",
+      back: "Welcome back! Want to pick a path?",
+      quick: "This is the 30-second version. HR friends, this one is for you.",
+      research: "This is Dio's paper. Want the simple version or the nerdy one?",
+      simple: "Simple version", nerdy: "Nerdy version",
+      simpleA: "Light can be too fast for cheap detectors. A tiny cavity spreads it over several slow detectors, and Dio's hybrid readout puts the signal back together, with 2.5 times less error than the usual method. Try the Steeper detector button below the text!",
+      nerdyA: "Ridge plus 1D CNN, mixed in the frequency domain with a raised-cosine crossover chosen on validation. 9-channel silicon microcavity, leave-one-waveform-out CV: NMSE 0.087 to 0.035 at second order, and 0.097 to 0.071 at fourth order, 9 of 10 folds.",
+      projects: "Projects! The grandma app is my favorite. Don't tell the others.",
+      experience: "Dio has edited papers for two IEEE conferences. He fixes commas for fun.",
+      diag: "You found the diagonal. Dio always looks for the third option. There are 5 secrets here. Tip: try tickling me.",
+      contact: "That's everything! If you liked it, Dio would love an email.",
+      tickle: "Hey! That tickles! Photons are very ticklish, you know.",
+      secret: (n) => `Secret found! That's ${n} of 5.`,
+      allSecrets: "All 5 secrets! You're officially Dio's favorite visitor.",
+      konami: "Up, up, down, down... a person of culture, I see.",
+      cavity: "Ooh, you overloaded the cavity! Good thing it's only light.",
+      tv: "Yes, real TV! Ask Dio about the Green Team.",
+      sleepy: "Zzz...",
+      wake: "Huh? I'm awake! I was just... recharging my photons.",
+      wakeHi: "Oh! You're back! I was just recharging my photons. Where to next?",
+      bars4: "See? On steep detectors the plain CNN struggles, but Dio's hybrid still wins.",
+      cv: "Two pages, newest first. The paper is on page one!",
+      recruiterHint: "Busy? The Recruiter mode button at the top hides me and all the effects. No hard feelings.",
+      journey: "Look, Kanazawa! That's where Dio found me, in the lab.",
+      demo: "Your turn! Pick Steeper detector, then MLP, and watch it break.",
+      stillNote: "Hi! I'm Piko. Your device asks websites to keep motion low, so I'm sitting still. Want to see the site with its animations?",
+      motionYes: "Yes, animate it", motionNo: "Keep it calm",
+      tapMe: "Hi! I'm Piko. Tap me if you want a tour."
+    },
+    id: {
+      greet: "Halo! Aku Piko, foton yang tersesat di lab Dio dan betah di sini. Mau kuajak keliling?",
+      gQuick: "Versi cepat", gFull: "Cerita lengkap", gDiag: "Yang seru", gLater: "Lihat sendiri",
+      later: "Oke! Aku tunggu di bawah sini. Klik aku kalau perlu.",
+      back: "Selamat datang lagi! Mau pilih jalur?",
+      quick: "Ini versi 30 detiknya. Buat teman-teman HR, ini untuk kalian.",
+      research: "Ini paper Dio. Mau versi sederhana atau versi nerd?",
+      simple: "Versi sederhana", nerdy: "Versi nerd",
+      simpleA: "Cahaya bisa terlalu cepat untuk detektor murah. Rongga kecil menyebarkannya ke beberapa detektor lambat, lalu readout hybrid buatan Dio menyusun sinyalnya kembali, dengan error 2,5 kali lebih kecil dari metode biasa. Coba tombol Detektor lebih curam di bawah teks!",
+      nerdyA: "Ridge ditambah 1D CNN, digabung di domain frekuensi dengan crossover raised-cosine yang dipilih dari validasi. Mikrokavitas silikon 9 channel, leave-one-waveform-out CV: NMSE 0,087 jadi 0,035 di orde dua, dan 0,097 jadi 0,071 di orde empat, menang 9 dari 10 fold.",
+      projects: "Proyek! Aplikasi untuk nenek itu favoritku. Jangan bilang yang lain ya.",
+      experience: "Dio pernah jadi editor paper untuk dua konferensi IEEE. Dia membetulkan koma untuk hiburan.",
+      diag: "Kamu menemukan jalur diagonal. Dio selalu mencari pilihan ketiga. Ada 5 rahasia di sini. Petunjuk: coba gelitik aku.",
+      contact: "Sudah semua! Kalau suka, Dio pasti senang dapat email darimu.",
+      tickle: "Hei! Geli! Foton itu gampang geli, tahu.",
+      secret: (n) => `Rahasia ditemukan! Sudah ${n} dari 5.`,
+      allSecrets: "Kelima rahasia ketemu! Resmi jadi pengunjung favorit Dio.",
+      konami: "Atas, atas, bawah, bawah... wah, ternyata gamer juga.",
+      cavity: "Wah, rongganya kelebihan muatan! Untung cuma cahaya.",
+      tv: "Iya, beneran masuk TV! Tanya Dio soal Tim Hijau.",
+      sleepy: "Zzz...",
+      wake: "Hah? Aku bangun kok! Tadi cuma... mengisi ulang foton.",
+      wakeHi: "Oh! Kamu kembali! Tadi aku lagi mengisi ulang foton. Mau ke mana sekarang?",
+      bars4: "Lihat? Di detektor yang curam, CNN biasa kesulitan, tapi hybrid buatan Dio tetap menang.",
+      cv: "Dua halaman, yang terbaru di atas. Paper-nya ada di halaman pertama!",
+      recruiterHint: "Sibuk? Tombol Mode recruiter di atas akan menyembunyikanku dan semua efeknya. Aku tidak marah kok.",
+      journey: "Lihat, Kanazawa! Di situlah Dio menemukanku, di lab.",
+      demo: "Giliranmu! Pilih Detektor lebih curam, lalu MLP, dan lihat hasilnya hancur.",
+      stillNote: "Halo! Aku Piko. Perangkatmu meminta situs untuk mengurangi gerakan, jadi aku diam saja. Mau lihat situs ini dengan animasinya?",
+      motionYes: "Ya, nyalakan animasi", motionNo: "Biarkan tenang",
+      tapMe: "Halo! Aku Piko. Ketuk aku kalau mau diajak keliling."
+    }
+  };
+
+  let lang = store.get("lang") === "id" ? "id" : "en";
+  const t = (k) => T[lang][k];
+  const p = (k) => P[lang][k];
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const v = T[lang][el.dataset.i18n];
+      if (typeof v === "string") el.textContent = v;
+    });
+    modeBtn.textContent = mode === "night" ? t("modeDay") : t("modeNight");
+    recBtn.textContent = document.body.classList.contains("recruiter") ? t("recOff") : t("recOn");
+    soundBtn.textContent = sound ? t("soundOn") : t("soundOff");
+    document.getElementById("barsNote").textContent = t(order === 2 ? "bN2" : "bN4");
+    motionBtn.textContent = reduceMotion ? t("animOff") : t("animOn");
+    demoText();
+    renderSecrets();
+  }
+
+  /* ---------------- day / night ---------------- */
+  const modeBtn = document.getElementById("modeBtn");
+  const hour = new Date().getHours();
+  let mode = store.get("mode") || (hour >= 6 && hour < 18 ? "day" : "night");
+  function applyMode() {
+    document.documentElement.dataset.mode = mode;
+    modeBtn.setAttribute("aria-pressed", String(mode === "night"));
+    modeBtn.textContent = mode === "night" ? t("modeDay") : t("modeNight");
+  }
+  modeBtn.addEventListener("click", () => { mode = mode === "night" ? "day" : "night"; store.set("mode", mode); applyMode(); });
+
+  /* ---------------- animations toggle ---------------- */
+  const motionBtn = document.getElementById("motionBtn");
+  motionBtn.setAttribute("aria-pressed", String(!reduceMotion));
+  motionBtn.addEventListener("click", () => { store.set("motion", reduceMotion ? "on" : "off"); location.reload(); });
+
+  /* ---------------- recruiter mode ---------------- */
+  const recBtn = document.getElementById("recBtn");
+  function setRecruiter(on) {
+    document.body.classList.toggle("recruiter", on);
+    recBtn.setAttribute("aria-pressed", String(on));
+    recBtn.textContent = on ? t("recOff") : t("recOn");
+    store.set("rec", on ? "1" : "0");
+    if (on) { stopScope(); document.getElementById("quick").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); }
+    else startScope();
+  }
+  recBtn.addEventListener("click", () => setRecruiter(!document.body.classList.contains("recruiter")));
+
+  /* ---------------- quick actions ---------------- */
+  document.getElementById("emailBtn").addEventListener("click", () => {
+    document.getElementById("emailNote").hidden = false;
+  });
+  document.getElementById("cvBtn").addEventListener("click", () => {
+    if (!document.body.classList.contains("recruiter")) speak(p("cv"));
+  });
+
+  /* ---------------- scope canvas ---------------- */
+  /* A broadband signal enters a stadium-shaped cavity. Inside, laser rays bounce
+     like in a stadium billiard (the shape real microcavities use, because the rays
+     never settle into one path). Three slower channels leave toward the paths. */
+  const canvas = document.getElementById("scopeCanvas");
+  const ctx = canvas.getContext("2d");
+  const stage = canvas.parentElement;
+  const btns = [...document.querySelectorAll(".path-btn")];
+  const colors = ["#e9c42a", "#27a6d6", "#d8489d"];
+  let W = 0, H = 0, dpr = 1, raf = 0, tick = 0, burst = 0;
+  const cav = { x: 0, y: 0, w: 0, h: 0 };
+
+  /* rays live in cavity units: half straight length A, radius R = 1 */
+  const R = 1, A = 0.62;
+  const rays = [
+    { x: -0.3, y: 0.2, a: 0.7, col: "#bdf2ff", trail: [] },
+    { x: 0.4, y: -0.5, a: 2.4, col: "#ffe58a", trail: [] },
+    { x: 0.0, y: 0.6, a: 4.1, col: "#ffb3e0", trail: [] }
+  ];
+  rays.forEach((r) => { r.vx = Math.cos(r.a); r.vy = Math.sin(r.a); });
+  function stepRay(r, speed) {
+    let n = 3;
+    while (n--) {
+      r.x += r.vx * speed / 3; r.y += r.vy * speed / 3;
+      if (Math.abs(r.x) <= A) {
+        if (Math.abs(r.y) > R) { r.vy = -r.vy; r.y = Math.sign(r.y) * (2 * R - Math.abs(r.y)); r.hit = 1; }
+      } else {
+        const cx = Math.sign(r.x) * A, dx = r.x - cx, dy = r.y, d = Math.hypot(dx, dy);
+        if (d > R) {
+          const nx = dx / d, ny = dy / d, dot = r.vx * nx + r.vy * ny;
+          r.vx -= 2 * dot * nx; r.vy -= 2 * dot * ny;
+          r.x = cx + nx * (R - 0.001); r.y = ny * (R - 0.001); r.hit = 1;
+        }
+      }
+    }
+    r.trail.push([r.x, r.y]);
+    if (r.trail.length > 46) r.trail.shift();
+  }
+  /* cavity units to canvas pixels */
+  const toPx = (u, v) => [cav.x + u * (cav.w / 2) / (A + R) * 0.93, cav.y + v * (cav.h / 2) * 0.86];
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cav.w = Math.max(70, W * 0.18); cav.h = cav.w * 0.62;
+    cav.x = W * 0.25; cav.y = H * 0.48;
+    draw();
+  }
+  function targets() {
+    const s = stage.getBoundingClientRect();
+    return btns.map((b) => {
+      const r = b.getBoundingClientRect();
+      return { x: r.left - s.left - 4, y: r.top - s.top + r.height / 2, hidden: b.offsetParent === null };
+    });
+  }
+  function stadium(x, y, w, h) {
+    const r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x - w / 2 + r, y - r);
+    ctx.lineTo(x + w / 2 - r, y - r);
+    ctx.arc(x + w / 2 - r, y, r, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(x - w / 2 + r, y + r);
+    ctx.arc(x - w / 2 + r, y, r, Math.PI / 2, Math.PI * 1.5);
+    ctx.closePath();
+  }
+  /* point on output channel i at fraction f along it */
+  function chan(i, f, tp, ph) {
+    const sx = cav.x + cav.w / 2, sy = cav.y;
+    const bx = sx + (tp.x - sx) * f;
+    const by = sy + (tp.y - sy) * (i === 2 ? f : Math.sin(f * Math.PI / 2));
+    const amp = Math.sin(f * Math.PI) * cav.h * 0.2 * (1 + burst);
+    return [bx, by + Math.sin(f * (9 - i * 2.5) - ph * (1.4 + i * 0.5)) * amp];
+  }
+  function draw() {
+    if (!W) return;
+    ctx.clearRect(0, 0, W, H);
+    const ph = tick * 0.05;
+    const swell = 1 + 0.25 * Math.sin(tick * 0.021);
+    /* input: a broadband signal, many frequencies at once */
+    const x0 = 6, x1 = cav.x - cav.w / 2;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#e8f4f8";
+    ctx.shadowColor = "#bfe9ff"; ctx.shadowBlur = 10;
+    ctx.beginPath();
+    for (let x = x0; x <= x1; x += 1.5) {
+      const u = x * 0.12 - ph * 3.2;
+      const env = 0.7 + 0.3 * Math.sin(x * 0.03 - ph);
+      const y = cav.y + (Math.sin(u) * 0.45 + Math.sin(u * 2.7 + 1) * 0.3 + Math.sin(u * 5.3 + 2) * 0.25) * cav.h * 0.42 * env * swell * (1 + burst * 0.8);
+      x === x0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    /* a bright packet riding the input into the cavity */
+    const pk = ((tick * 2.2) % (x1 - x0 + 40)) + x0 - 20;
+    if (pk > x0 && pk < x1) {
+      ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.arc(pk, cav.y, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    /* cavity body */
+    ctx.shadowColor = "#7fd6ff"; ctx.shadowBlur = 14 + burst * 30;
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#9fe0ff";
+    ctx.fillStyle = `rgba(120, 210, 255, ${0.07 + burst * 0.3})`;
+    stadium(cav.x, cav.y, cav.w, cav.h);
+    ctx.fill(); ctx.stroke();
+    /* laser rays bouncing inside */
+    ctx.save();
+    stadium(cav.x, cav.y, cav.w - 3, cav.h - 3); ctx.clip();
+    ctx.lineCap = "round";
+    rays.forEach((r) => {
+      const t = r.trail;
+      for (let k = 1; k < t.length; k++) {
+        const a = k / t.length;
+        const [px, py] = toPx(t[k - 1][0], t[k - 1][1]);
+        const [qx, qy] = toPx(t[k][0], t[k][1]);
+        /* wide colored halo, then a thin white-hot core */
+        ctx.strokeStyle = r.col; ctx.globalAlpha = a * 0.35; ctx.lineWidth = 5; ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, qy); ctx.stroke();
+        ctx.strokeStyle = "#ffffff"; ctx.globalAlpha = a * 0.9; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, qy); ctx.stroke();
+      }
+      const [hx, hy] = toPx(r.x, r.y);
+      ctx.globalAlpha = 1; ctx.fillStyle = "#fff"; ctx.shadowColor = r.col; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(hx, hy, 2.4 + (r.hit || 0) * 2.5, 0, Math.PI * 2); ctx.fill();
+      r.hit = (r.hit || 0) * 0.8;
+    });
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    /* three slower output channels, with photons running along them */
+    const tg = targets();
+    tg.forEach((tp, i) => {
+      if (tp.hidden) return;
+      ctx.strokeStyle = colors[i];
+      ctx.shadowColor = colors[i]; ctx.shadowBlur = 10;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let k = 0; k <= 90; k++) {
+        const [x, y] = chan(i, k / 90, tp, ph);
+        k === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      for (let j = 0; j < 2; j++) {
+        const f = ((tick * (0.006 + i * 0.0015)) + j * 0.5 + i * 0.21) % 1;
+        const [x, y] = chan(i, f, tp, ph);
+        ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 16;
+        ctx.beginPath(); ctx.arc(x, y, 2.8, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.shadowBlur = 0;
+  }
+  function loop() {
+    tick++;
+    burst *= 0.95;
+    const sp = 0.075 * (1 + burst * 2.5);
+    rays.forEach((r) => stepRay(r, sp));
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+  /* pre-run the rays so the first frame (and reduced motion) already shows trails */
+  for (let k = 0; k < 60; k++) rays.forEach((r) => stepRay(r, 0.075));
+  function startScope() { if (!reduceMotion && !raf && !document.body.classList.contains("recruiter")) raf = requestAnimationFrame(loop); else draw(); }
+  function stopScope() { cancelAnimationFrame(raf); raf = 0; draw(); }
+  new ResizeObserver(resize).observe(stage);
+  document.addEventListener("visibilitychange", () => (document.hidden ? stopScope() : startScope()));
+  /* pause the scope when it scrolls out of view, to save battery */
+  new IntersectionObserver(([en]) => (en.isIntersecting ? startScope() : stopScope())).observe(stage);
+
+  let cavClicks = 0;
+  canvas.addEventListener("click", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    if (Math.abs(x - cav.x) < cav.w / 2 + 8 && Math.abs(y - cav.y) < cav.h / 2 + 8) {
+      burst = 1; cavClicks++;
+      if (reduceMotion) draw();
+      if (cavClicks === 3) { speak(p("cavity")); found("cavity"); }
+    }
+  });
+
+  /* ---------------- research chart ---------------- */
+  const DATA = {
+    2: { ridge: [0.0869, null], mlp: [0.0598, "8/10"], cnn: [0.0354, "10/10"], hyb: [0.0346, "10/10"] },
+    4: { ridge: [0.0966, null], mlp: [0.6112, "0/10"], cnn: [0.1754, "1/10"], hyb: [0.0714, "9/10"] }
+  };
+  const barsEl = document.getElementById("bars");
+  const barRows = [...barsEl.querySelectorAll(".bar")];
+  let order = 2, barsShown = false;
+  barRows.forEach((b, i) => b.querySelector(".fill").style.setProperty("--i", i));
+  function countTo(el, to) {
+    if (reduceMotion) { el.textContent = to.toFixed(3); return; }
+    const from = parseFloat(el.textContent) || 0, t0 = performance.now();
+    const stepFn = (now) => {
+      const k = Math.min(1, (now - t0) / 1000), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = (from + (to - from) * e).toFixed(3);
+      if (k < 1) requestAnimationFrame(stepFn);
+    };
+    requestAnimationFrame(stepFn);
+  }
+  function renderBars() {
+    const d = DATA[order];
+    const max = Math.max(...Object.values(d).map((v) => v[0]));
+    barRows.forEach((b) => {
+      const [v, wins] = d[b.dataset.k];
+      b.querySelector(".fill").style.width = barsShown ? (v / max * 100).toFixed(1) + "%" : "0%";
+      if (barsShown) countTo(b.querySelector(".v"), v);
+      if (wins) b.querySelector(".w").textContent = wins;
+    });
+    document.getElementById("barsNote").textContent = t(order === 2 ? "bN2" : "bN4");
+    barsEl.querySelectorAll(".segb").forEach((s) => s.setAttribute("aria-pressed", String(+s.dataset.order === order)));
+  }
+  barsEl.querySelectorAll(".segb").forEach((s) => s.addEventListener("click", () => {
+    order = +s.dataset.order;
+    barsShown = true; barsEl.classList.add("run");
+    renderBars();
+    if (order === 4) speak(p("bars4"));
+  }));
+  new IntersectionObserver(([en], obs) => {
+    if (!en.isIntersecting) return;
+    barsShown = true; barsEl.classList.add("run");
+    barRows.forEach((b) => (b.querySelector(".v").textContent = "0.000"));
+    renderBars();
+    obs.disconnect();
+  }, { threshold: 0.5 }).observe(barsEl);
+
+  /* ---------------- sections power on ---------------- */
+  const revealTargets = [...document.querySelectorAll("section.band, section.contact")];
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("js-reveal");
+    const rio = new IntersectionObserver((entries) => {
+      entries.forEach((en) => en.target.classList.toggle("lit", en.isIntersecting));
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    revealTargets.forEach((el) => rio.observe(el));
+  } else {
+    revealTargets.forEach((el) => el.classList.add("lit"));
+  }
+
+  /* ---------------- journey: light travels down the timeline ---------------- */
+  const jList = document.getElementById("journeyList");
+  const stops = [...jList.children];
+  const outP = document.getElementById("routeOut"), backP = document.getElementById("routeBack"), routeDot = document.getElementById("routeDot");
+  const outLen = outP.getTotalLength(), backLen = backP.getTotalLength();
+  /* stops 0 to 2 in Bandung, fly out between 2 and 3, Kanazawa until 4, fly back between 4 and 5 */
+  function placeDot(f) {
+    let pt;
+    if (f <= 2) pt = outP.getPointAtLength(0);
+    else if (f < 3) pt = outP.getPointAtLength((f - 2) * outLen);
+    else if (f <= 4) pt = outP.getPointAtLength(outLen);
+    else if (f < 5) pt = backP.getPointAtLength((f - 4) * backLen);
+    else pt = backP.getPointAtLength(backLen);
+    routeDot.setAttribute("cx", pt.x.toFixed(1));
+    routeDot.setAttribute("cy", pt.y.toFixed(1));
+  }
+  let jTarget = 0, jCur = 0, jRaf = 0;
+  function tickJourney() {
+    jCur += (jTarget - jCur) * (reduceMotion ? 1 : 0.14);
+    if (Math.abs(jTarget - jCur) < 0.002) jCur = jTarget;
+    placeDot(jCur);
+    jRaf = jCur === jTarget ? 0 : requestAnimationFrame(tickJourney);
+  }
+  function journeyScroll() {
+    const line = window.innerHeight * 0.55;
+    const r = jList.getBoundingClientRect();
+    jList.style.setProperty("--prog", Math.max(0, Math.min(1, (line - r.top) / r.height)).toFixed(3));
+    const tops = stops.map((st) => st.getBoundingClientRect().top);
+    let f = 0;
+    stops.forEach((st, i) => {
+      const on = tops[i] + 8 < line;
+      st.classList.toggle("on", on);
+      if (on) {
+        const next = i + 1 < tops.length ? tops[i + 1] : tops[i] + 60;
+        f = i + Math.max(0, Math.min(1, (line - tops[i]) / (next - tops[i])));
+      }
+    });
+    jTarget = Math.min(stops.length - 1, f);
+    if (!jRaf) jRaf = requestAnimationFrame(tickJourney);
+  }
+  window.addEventListener("scroll", journeyScroll, { passive: true });
+  window.addEventListener("resize", journeyScroll);
+  placeDot(0);
+
+  /* ---------------- project cards that flip ---------------- */
+  document.querySelectorAll(".card").forEach((card) => {
+    const front = card.querySelector(".front"), back = card.querySelector(".back");
+    const [fb, bb] = card.querySelectorAll(".flipbtn");
+    const flip = (on) => {
+      card.classList.toggle("flipped", on);
+      front.inert = on; back.inert = !on;
+      fb.setAttribute("aria-expanded", String(on));
+      (on ? bb : fb).focus({ preventScroll: true });
+    };
+    front.addEventListener("click", () => flip(true));
+    bb.addEventListener("click", (e) => { e.stopPropagation(); flip(false); });
+  });
+
+  /* ---------------- thesis demo ---------------- */
+  /* Numbers from the paper: Table II (mean NMSE over ten folds) and Table III (NMSE per band). */
+  const DEMO = {
+    nmse: { 2: { ridge: 0.0869, mlp: 0.0598, cnn: 0.0354, hyb: 0.0346 }, 4: { ridge: 0.0966, mlp: 0.6112, cnn: 0.1754, hyb: 0.0714 } },
+    band: {
+      2: { ridge: [0.1619, 0.0103, 0.0064], mlp: [0.0705, 0.0142, 0.0328], cnn: [0.0558, 0.0076, 0.0080], hyb: [0.0558, 0.0073, 0.0061] },
+      4: { ridge: [0.1595, 0.0108, 0.0098], mlp: [0.2422, 0.4216, 1.1181], cnn: [0.1478, 0.0480, 0.3093], hyb: [0.1307, 0.0108, 0.0098] }
+    },
+    col: { ridge: "#a9b8c6", mlp: "#e9c42a", cnn: "#27a6d6", hyb: "#3cb56a" }
+  };
+  const dCanvas = document.getElementById("demoCanvas");
+  const dctx = dCanvas.getContext("2d");
+  const dStage = dCanvas.parentElement;
+  let dR = "hyb", dO = 2, dW = 0, dH = 0, dRaf = 0, dT = 0, comps = [];
+  const errCur = [0, 0, 0];
+  const BANDS = [[0.15, 1], [1, 5], [5, 10]]; /* GHz */
+  function newSignal() {
+    comps = [];
+    BANDS.forEach(([lo, hi], b) => {
+      for (let k = 0; k < 4; k++) {
+        comps.push({ b, f: lo + Math.random() * (hi - lo), a: 0.6 + Math.random() * 0.4, ph: Math.random() * 6.283, eph: Math.random() * 6.283 });
+      }
+    });
+    const v = comps.reduce((s, c) => s + c.a * c.a / 2, 0);
+    comps.forEach((c) => (c.a /= Math.sqrt(v))); /* unit variance */
+  }
+  function demoSize() {
+    const r = dStage.getBoundingClientRect(), k = Math.min(window.devicePixelRatio || 1, 2);
+    dW = r.width; dH = r.height;
+    dCanvas.width = dW * k; dCanvas.height = dH * k;
+    dctx.setTransform(k, 0, 0, k, 0, 0);
+    drawDemo();
+  }
+  function drawDemo() {
+    if (!dW) return;
+    dctx.clearRect(0, 0, dW, dH);
+    const N = 420, span = 3; /* nanoseconds on screen */
+    const mid = dH / 2, sc = dH * 0.15;
+    const target = [], recon = [], det = [];
+    for (let i = 0; i <= N; i++) {
+      const t = dT + (i / N) * span;
+      let u = 0, e = 0, d = 0;
+      comps.forEach((c) => {
+        const w = 6.283 * c.f * t;
+        u += c.a * Math.sin(w + c.ph);
+        e += c.a * errCur[c.b] * Math.sin(w + c.eph);
+        d += c.a * Math.sin(w + c.ph) / Math.sqrt(1 + Math.pow(c.f, 2 * dO)); /* Butterworth gain, 1 GHz cutoff */
+      });
+      const x = (i / N) * dW;
+      target.push([x, mid - u * sc]); recon.push([x, mid - (u + e) * sc]); det.push([x, mid - d * sc]);
+    }
+    const line = (pts, col, w, blur, alpha) => {
+      dctx.globalAlpha = alpha; dctx.strokeStyle = col; dctx.lineWidth = w; dctx.shadowColor = col; dctx.shadowBlur = blur;
+      dctx.beginPath(); pts.forEach(([x, y], i) => (i ? dctx.lineTo(x, y) : dctx.moveTo(x, y))); dctx.stroke();
+    };
+    /* shaded gap between real signal and reconstruction = the error */
+    dctx.globalAlpha = 0.2; dctx.fillStyle = DEMO.col[dR]; dctx.shadowBlur = 0;
+    dctx.beginPath();
+    target.forEach(([x, y], i) => (i ? dctx.lineTo(x, y) : dctx.moveTo(x, y)));
+    for (let i = recon.length - 1; i >= 0; i--) dctx.lineTo(recon[i][0], recon[i][1]);
+    dctx.closePath(); dctx.fill();
+    line(det, "#5fb7d6", 4, 0, 0.45);
+    line(target, "#ffffff", 1.8, 6, 0.95);
+    line(recon, DEMO.col[dR], 2.2, 10, 1);
+    dctx.globalAlpha = 1; dctx.shadowBlur = 0;
+  }
+  function demoLoop() {
+    dT += 0.004;
+    const tgt = DEMO.band[dO][dR].map(Math.sqrt);
+    for (let b = 0; b < 3; b++) errCur[b] += (tgt[b] - errCur[b]) * 0.08;
+    drawDemo();
+    dRaf = requestAnimationFrame(demoLoop);
+  }
+  function demoText() {
+    document.getElementById("demoVerdict").textContent = t("v_" + dR + dO);
+  }
+  function demoUpdate() {
+    const bands = DEMO.band[dO][dR];
+    document.querySelectorAll("#pickReadout .pill").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === dR)));
+    document.querySelectorAll("#pickOrder .pill").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.o === dO)));
+    countTo(document.getElementById("demoNmse"), DEMO.nmse[dO][dR]);
+    const rows = document.querySelectorAll("#demoBands .band-row");
+    document.getElementById("demoBands").style.setProperty("--pc", DEMO.col[dR]);
+    rows.forEach((row, i) => {
+      row.querySelector(".fill").style.width = Math.max(2, Math.min(100, bands[i] / 0.35 * 100)).toFixed(1) + "%";
+      row.querySelector(".v").textContent = bands[i].toFixed(3);
+    });
+    document.getElementById("legRec").style.background = DEMO.col[dR];
+    demoText();
+    if (reduceMotion || !dRaf) { DEMO.band[dO][dR].forEach((v, b) => (errCur[b] = Math.sqrt(v))); drawDemo(); }
+  }
+  document.querySelectorAll("#pickReadout .pill").forEach((b) => b.addEventListener("click", () => { dR = b.dataset.r; demoUpdate(); }));
+  document.querySelectorAll("#pickOrder .pill").forEach((b) => b.addEventListener("click", () => { dO = +b.dataset.o; demoUpdate(); }));
+  document.getElementById("newSignal").addEventListener("click", () => { newSignal(); drawDemo(); });
+  newSignal();
+  DEMO.band[dO][dR].forEach((v, b) => (errCur[b] = Math.sqrt(v)));
+  new ResizeObserver(demoSize).observe(dStage);
+  new IntersectionObserver(([en]) => {
+    if (en.isIntersecting && !reduceMotion && !document.body.classList.contains("recruiter")) { if (!dRaf) dRaf = requestAnimationFrame(demoLoop); }
+    else { cancelAnimationFrame(dRaf); dRaf = 0; drawDemo(); }
+  }).observe(dStage);
+
+  /* ---------------- secrets ---------------- */
+  const KEYS = ["tickle", "diag", "konami", "cavity", "tv"];
+  let secrets = new Set((store.get("secrets") || "").split(",").filter((k) => KEYS.includes(k)));
+  function renderSecrets() {
+    document.getElementById("secretsText").textContent = T[lang].secrets(secrets.size);
+    document.querySelectorAll("#dots i").forEach((d, i) => d.classList.toggle("on", i < secrets.size));
+  }
+  function found(key, quiet) {
+    if (secrets.has(key)) return;
+    secrets.add(key);
+    store.set("secrets", [...secrets].join(","));
+    renderSecrets();
+    if (quiet) return;
+    setTimeout(() => speak(secrets.size === 5 ? p("allSecrets") : P[lang].secret(secrets.size)), 2600);
+  }
+  document.getElementById("tvFact").addEventListener("click", () => { speak(p("tv")); found("tv"); });
+  const code = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+  let ci = 0;
+  document.addEventListener("keydown", (e) => {
+    ci = e.key === code[ci] || e.key.toLowerCase() === code[ci] ? ci + 1 : (e.key === code[0] ? 1 : 0);
+    if (ci === code.length) { ci = 0; speak(p("konami")); found("konami"); }
+  });
+
+  /* ---------------- Piko ---------------- */
+  const root = document.getElementById("pikoRoot");
+  const dialog = document.getElementById("dialog");
+  const say = document.getElementById("say");
+  const choices = document.getElementById("choices");
+  const pikoBtn = document.getElementById("pikoBtn");
+  const soundBtn = document.getElementById("soundBtn");
+  let sound = store.get("sound") === "1";
+  let audio = null, typing = 0, fullText = "";
+
+  function blip() {
+    if (!sound) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = "square";
+      o.frequency.value = 560 + Math.random() * 90;
+      g.gain.setValueAtTime(0.045, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.05);
+      o.connect(g).connect(audio.destination);
+      o.start(); o.stop(audio.currentTime + 0.055);
+    } catch (e) { /* no audio, stay quiet */ }
+  }
+  soundBtn.addEventListener("click", () => {
+    sound = !sound;
+    store.set("sound", sound ? "1" : "0");
+    soundBtn.setAttribute("aria-pressed", String(sound));
+    soundBtn.textContent = sound ? t("soundOn") : t("soundOff");
+    if (sound) { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch (e) {} blip(); }
+  });
+
+  /* --- where Piko is, and flying --- */
+  const canFly = () => !reduceMotion && !small.matches;
+  let pos = { x: 0, y: 0 }, atHome = true, flight = 0, perchEl = null;
+  const size = () => ({ w: root.offsetWidth || 78, h: root.offsetHeight || 74 });
+  function home() {
+    const { w, h } = size();
+    return { x: window.innerWidth - w - 18, y: window.innerHeight - h - 18 };
+  }
+  function setPos(x, y) {
+    pos = { x, y };
+    root.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+  }
+  function trailDot(x, y) {
+    const d = document.createElement("i");
+    d.className = "trail";
+    d.style.translate = `${x}px ${y}px`;
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 720);
+  }
+  function fly(to, done) {
+    cancelAnimationFrame(flight);
+    if (!canFly()) { setPos(to.x, to.y); done && done(); return; }
+    const from = { ...pos };
+    const dist = Math.hypot(to.x - from.x, to.y - from.y);
+    if (dist < 4) { setPos(to.x, to.y); done && done(); return; }
+    /* curve: arc up and inward, like a little swoop */
+    const cp = { x: (from.x + to.x) / 2 - Math.min(160, dist * 0.35), y: Math.max(20, Math.min(from.y, to.y) - Math.min(140, dist * 0.3)) };
+    const dur = Math.min(1300, 600 + dist * 0.6), t0 = performance.now();
+    const { w, h } = size();
+    let n = 0, lastX = from.x;
+    const stepFn = (now) => {
+      const k = Math.min(1, (now - t0) / dur);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const x = (1 - e) * (1 - e) * from.x + 2 * (1 - e) * e * cp.x + e * e * to.x;
+      const y = (1 - e) * (1 - e) * from.y + 2 * (1 - e) * e * cp.y + e * e * to.y;
+      setPos(x, y);
+      pikoBtn.style.transform = `rotate(${Math.max(-18, Math.min(18, (x - lastX) * 1.6))}deg)`;
+      lastX = x;
+      if (n++ % 2 === 0) trailDot(x + w / 2, y + h / 2);
+      if (k < 1) flight = requestAnimationFrame(stepFn);
+      else { flight = 0; pikoBtn.style.transform = ""; done && done(); }
+    };
+    flight = requestAnimationFrame(stepFn);
+  }
+  /* --- keeping the bubble off what people want to read --- */
+  const peek = document.getElementById("peekBtn");
+  let dims = { bw: 330, bh: 120 };
+  const TEXT_SEL = "main h1, main h2, main h3, main p, main dt, main dd, main figcaption";
+  const BOX_SEL = "main img, main canvas, .scope, .route, .demo-panel, .bars, .card, main .btn, .pill, .seg, .funfacts li";
+  function clearRects() {
+    const vw = window.innerWidth, vh = window.innerHeight, out = [];
+    const keep = (r) => { if (r.width && r.height && r.bottom > -vh && r.top < 2 * vh && r.right > 0 && r.left < vw) out.push(r); };
+    document.querySelectorAll(BOX_SEL).forEach((el) => keep(el.getBoundingClientRect()));
+    const range = document.createRange();
+    document.querySelectorAll(TEXT_SEL).forEach((el) => {
+      const br = el.getBoundingClientRect();
+      if (!br.height || br.bottom < -vh || br.top > 2 * vh) return;
+      range.selectNodeContents(el);
+      [...range.getClientRects()].forEach(keep);
+    });
+    return out;
+  }
+  const inter = (a, r) => Math.max(0, Math.min(a.x + a.w, r.right) - Math.max(a.x, r.left)) * Math.max(0, Math.min(a.y + a.h, r.bottom) - Math.max(a.y, r.top));
+  const topLimit = () => (small.matches ? 8 : 62);
+  function bubbleOffsets() {
+    const { w, h } = size(), { bw, bh } = dims;
+    return [
+      { dx: w - bw, dy: -bh - 10 }, { dx: 0, dy: -bh - 10 },              /* above */
+      { dx: w + 10, dy: (h - bh) / 2 }, { dx: -bw - 10, dy: (h - bh) / 2 }, /* beside */
+      { dx: w - bw, dy: h + 10 }, { dx: 0, dy: h + 10 }                     /* below */
+    ];
+  }
+  function scoreAt(px, py, off, rects) {
+    const { w, h } = size(), { bw, bh } = dims;
+    const b = { x: px + off.dx, y: py + off.dy, w: bw, h: bh };
+    if (b.x < 8 || b.y < topLimit() || b.x + bw > window.innerWidth - 8 || b.y + bh > window.innerHeight - 8) return Infinity;
+    const me = { x: px, y: py, w, h };
+    return rects.reduce((sum, r) => sum + inter(b, r) + 0.6 * inter(me, r), 0);
+  }
+  function bestBubble(px, py, rects) {
+    const offs = bubbleOffsets();
+    let best = { off: offs[0], s: Infinity };
+    offs.forEach((off) => { const sc = scoreAt(px, py, off, rects); if (sc < best.s) best = { off, s: sc }; });
+    return best;
+  }
+  function applyBubble(off) {
+    const { w, h } = size(), { bw, bh } = dims;
+    dialog.style.left = off.dx + "px";
+    dialog.style.top = off.dy + "px";
+    dialog.style.transformOrigin = `${Math.max(0, Math.min(bw, w / 2 - off.dx))}px ${Math.max(0, Math.min(bh, h / 2 - off.dy))}px`;
+  }
+  function placeBubbleHere(px = pos.x, py = pos.y) { applyBubble(bestBubble(px, py, clearRects()).off); }
+
+  function goHome() { perchEl = null; atHome = true; const hm = home(); placeBubbleHere(hm.x, hm.y); fly(hm); }
+  /* perch where Piko and his bubble cover the least, then follow the heading while the visitor reads */
+  let perchOff = { dx: 18, dy: 0 };
+  function headingLine(h2) {
+    const range = document.createRange();
+    range.selectNodeContents(h2);
+    const rs = range.getClientRects();
+    return rs[rs.length - 1] || h2.getBoundingClientRect();
+  }
+  const clampSpot = (x, y) => {
+    const { w, h } = size();
+    return { x: Math.max(8, Math.min(window.innerWidth - w - 18, x)), y: Math.max(topLimit() + 4, Math.min(window.innerHeight - h - 18, y)) };
+  };
+  function perch(section) {
+    if (!canFly()) { placeBubbleHere(); return; }
+    const h2 = section.querySelector("h2");
+    if (!h2) return;
+    const last = headingLine(h2);
+    const { w, h } = size();
+    const midY = last.top + last.height / 2 - h / 2;
+    const spots = [
+      clampSpot(last.right + 18, midY),                 /* right after the heading */
+      clampSpot(last.right - w, last.top - h - 6),       /* just above its end */
+      clampSpot(window.innerWidth - w - 18, midY)        /* page edge, same height */
+    ];
+    const rects = clearRects();
+    let best = null;
+    spots.forEach((sp, i) => {
+      const b = bestBubble(sp.x, sp.y, rects);
+      const sc = b.s + i * 400; /* small preference for staying close to the heading */
+      if (!best || sc < best.s) best = { sp, off: b.off, s: sc };
+    });
+    /* nowhere clear enough: stay in the corner instead */
+    if (!best || best.s > dims.bw * dims.bh * 0.12) { goHome(); return; }
+    perchEl = null; atHome = false;
+    perchOff = { dx: best.sp.x - last.right, dy: best.sp.y - last.top };
+    applyBubble(best.off);
+    /* on landing, catch up with the heading (the page may have scrolled meanwhile), then re-check the space */
+    fly(best.sp, () => { perchEl = h2; follow(); settle(); });
+  }
+  function follow() {
+    if (!perchEl || flight) return;
+    const last = headingLine(perchEl);
+    if (last.bottom < 0 || last.top > window.innerHeight) { goHome(); return; }
+    const sp = clampSpot(last.right + perchOff.dx, last.top + perchOff.dy);
+    setPos(sp.x, sp.y);
+  }
+  window.addEventListener("scroll", follow, { passive: true });
+  window.addEventListener("resize", () => { if (atHome && !flight) setPos(home().x, home().y); });
+  /* once things are still, check again: move the bubble to a clear side, or send Piko home if he sits on content */
+  function settle() {
+    if (flight || root.classList.contains("asleep")) return;
+    const rects = clearRects(), { w, h } = size();
+    const me = { x: pos.x, y: pos.y, w, h };
+    const onContent = rects.reduce((sum, r) => sum + inter(me, r), 0);
+    if (!atHome && onContent > w * h * 0.35) { goHome(); return; }
+    if (dialog.hidden) return;
+    const here = bestBubble(pos.x, pos.y, rects);
+    if (!atHome && here.s > dims.bw * dims.bh * 0.12) { goHome(); return; }
+    applyBubble(here.off);
+  }
+  let settleTimer = 0;
+  window.addEventListener("scroll", () => { clearTimeout(settleTimer); settleTimer = setTimeout(settle, 180); }, { passive: true });
+
+  /* --- talking --- */
+  let currentOpts = [], fadeTimer = 0;
+  function renderChoices() {
+    choices.innerHTML = "";
+    currentOpts.forEach(([label, fn]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label;
+      b.addEventListener("click", fn);
+      choices.appendChild(b);
+    });
+  }
+  /* a remark without choices folds into a small chip after 5 seconds, and Piko heads home */
+  function fold() {
+    dialog.hidden = true;
+    dialog.classList.remove("ghost");
+    peek.hidden = false;
+    if (!atHome) goHome();
+  }
+  function finishLine() {
+    clearInterval(typing); typing = 0;
+    clearTimeout(fadeTimer);
+    if (!currentOpts.length) fadeTimer = setTimeout(fold, 5000);
+    say.textContent = fullText;
+    renderChoices();
+  }
+  peek.addEventListener("click", () => {
+    peek.hidden = true;
+    dialog.hidden = false;
+    placeBubbleHere();
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(fold, 5000);
+    resetIdle();
+  });
+  function speak(text, opts) {
+    if (document.body.classList.contains("recruiter")) return;
+    root.classList.remove("asleep");
+    resetIdle();
+    clearTimeout(fadeTimer);
+    clearInterval(typing);
+    dialog.hidden = false;
+    dialog.classList.remove("ghost");
+    peek.hidden = true;
+    fullText = text;
+    currentOpts = opts || [];
+    /* measure the finished bubble first, so it can be placed where it covers the least */
+    say.textContent = fullText;
+    renderChoices();
+    dims = { bw: dialog.offsetWidth, bh: dialog.offsetHeight };
+    choices.innerHTML = "";
+    placeBubbleHere();
+    if (reduceMotion) return finishLine();
+    let i = 0;
+    say.textContent = "";
+    typing = setInterval(() => {
+      i++;
+      say.textContent = fullText.slice(0, i);
+      const ch = fullText[i - 1];
+      if (ch && ch !== " " && i % 2 === 0) blip();
+      if (i >= fullText.length) finishLine();
+    }, 24);
+  }
+  /* click the text to skip the typing */
+  say.addEventListener("click", () => { if (typing) finishLine(); });
+
+  function go(id) { goHome(); document.getElementById(id).scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); }
+  const pathChoices = () => [
+    [p("gQuick"), () => go("quick")],
+    [p("gFull"), () => go("research")],
+    [p("gDiag"), () => go("diagonal")],
+    [p("gLater"), () => speak(p("later"))]
+  ];
+  function greet(again) { speak(again ? p("back") : p("greet"), pathChoices()); }
+  document.getElementById("hideBtn").addEventListener("click", () => { dialog.hidden = true; peek.hidden = true; sess.set("hidden", "1"); goHome(); pikoBtn.focus(); });
+  /* bubble turns see-through when the mouse comes close, unless it is asking a question */
+  window.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || dialog.hidden) return;
+    const r = dialog.getBoundingClientRect(), pad = 28;
+    const near = e.clientX > r.left - pad && e.clientX < r.right + pad && e.clientY > r.top - pad && e.clientY < r.bottom + pad;
+    dialog.classList.toggle("ghost", near && !currentOpts.length);
+  }, { passive: true });
+
+  /* --- sleeping and waking --- */
+  let idleTimer = 0;
+  function resetIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(sleep, 45000); }
+  function sleep() {
+    if (document.body.classList.contains("recruiter")) return;
+    root.classList.add("asleep");
+    clearInterval(typing); typing = 0; clearTimeout(fadeTimer);
+    if (!dialog.hidden) { say.textContent = p("sleepy"); choices.innerHTML = ""; currentOpts = []; }
+    if (!atHome) goHome();
+  }
+  function hop() { pikoBtn.classList.remove("hop"); void pikoBtn.offsetWidth; pikoBtn.classList.add("hop"); }
+  function wakeUp() {
+    root.classList.remove("asleep");
+    hop();
+    resetIdle();
+    if (sess.get("hidden") === "1") return; /* the visitor asked for quiet: wake, but don't talk */
+    speak(p("wakeHi"), pathChoices());
+  }
+  /* any sign of life wakes Piko up and he says hello */
+  ["pointermove", "pointerdown", "keydown", "wheel", "touchstart", "scroll"].forEach((ev) =>
+    window.addEventListener(ev, () => {
+      if (root.classList.contains("asleep")) wakeUp(); else resetIdle();
+    }, { passive: true }));
+
+  let tickles = 0, tickleTimer = 0, invited = false;
+  choices.addEventListener("click", () => { invited = true; });
+  pikoBtn.addEventListener("click", () => {
+    invited = true;
+    tickles++;
+    clearTimeout(tickleTimer);
+    tickleTimer = setTimeout(() => (tickles = 0), 1500);
+    if (tickles >= 5) {
+      tickles = 0;
+      pikoBtn.classList.remove("giggle"); void pikoBtn.offsetWidth; pikoBtn.classList.add("giggle");
+      speak(p("tickle")); found("tickle");
+      return;
+    }
+    if (dialog.hidden) { sess.set("hidden", "0"); greet(true); }
+    else if (tickles === 1 && !typing) greet(true);
+  });
+
+  /* comment on each section once, flying over to it */
+  const seen = new Set();
+  const lines = {
+    quick: () => speak(p("quick")),
+    research: () => speak(p("research"), [
+      [p("simple"), () => speak(p("simpleA"))],
+      [p("nerdy"), () => speak(p("nerdyA"))]
+    ]),
+    journey: () => speak(p("journey")),
+    demo: () => speak(p("demo")),
+    projects: () => speak(p("projects")),
+    experience: () => speak(p("experience")),
+    diagonal: () => { speak(p("diag")); found("diag", true); },
+    contact: () => speak(p("contact"))
+  };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting || seen.has(en.target.id)) return;
+      if (root.classList.contains("asleep")) return;
+      seen.add(en.target.id);
+      if (dialog.hidden && sess.get("hidden") === "1") return;
+      if (small.matches && !invited) return;
+      lines[en.target.id]();
+      perch(en.target);
+    });
+  }, { threshold: 0, rootMargin: "0px 0px -45% 0px" });
+  Object.keys(lines).forEach((id) => io.observe(document.getElementById(id)));
+
+  /* path buttons on the scope */
+  btns.forEach((b) => b.addEventListener("click", () => { if (b.dataset.path === "diag") found("diag", true); }));
+
+  /* ---------------- start ---------------- */
+  document.getElementById("langBtn").addEventListener("click", () => {
+    lang = lang === "en" ? "id" : "en";
+    store.set("lang", lang);
+    applyLang();
+    if (!dialog.hidden) greet(true);
+  });
+  applyMode();
+  applyLang();
+  soundBtn.setAttribute("aria-pressed", String(sound));
+  if (store.get("rec") === "1") setRecruiter(true);
+  resize();
+  startScope();
+  resetIdle();
+  demoUpdate();
+  journeyScroll();
+
+  /* Piko flies in from the right edge, then says hello */
+  if (canFly()) {
+    setPos(window.innerWidth + 30, window.innerHeight * 0.35);
+  } else {
+    const h0 = home(); setPos(h0.x, h0.y);
+  }
+  setTimeout(() => {
+    fly(home(), () => {
+      if (sess.get("hidden") === "1") return;
+      if (osReduce && !motionPref) {
+        speak(p("stillNote"), [
+          [p("motionYes"), () => { store.set("motion", "on"); location.reload(); }],
+          [p("motionNo"), () => { store.set("motion", "off"); greet(false); }]
+        ]);
+        return;
+      }
+      if (small.matches) {
+        speak(p("tapMe"));
+        return;
+      }
+      greet(store.get("visited") === "1");
+      store.set("visited", "1");
+    });
+  }, 1100);
+  setTimeout(() => { if (!dialog.hidden && !typing && !seen.size) speak(p("recruiterHint"), [[p("gQuick"), () => go("quick")]]); }, 30000);
+})();
+</script>
+</body>
+</html>
